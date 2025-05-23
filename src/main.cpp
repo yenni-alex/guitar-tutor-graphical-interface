@@ -3,16 +3,16 @@
 #include "Config.h"
 #include "AudioProcessor.h"
 #include "LedController.h"
+#include "xml.h"
 #include <TeensyThreads.h>
 
-DisplayManager display;
 LedController ledController;
 
 void UpdateDisplayThread() {
   while (true) {
-    display.clear(ILI9341_T4_COLOR_GREEN);
-    display.drawTabulation();
-    display.update();
+    clearDisplay(ILI9341_T4_COLOR_GREEN);
+    drawTabulation();
+    updateDisplay();
     threads.delay(20);
   }
 }
@@ -51,11 +51,14 @@ void updateLedsThread() {
 
 void setup() {
   Serial.begin(115200);
-  display.init();
+  initDisplay();
   initAudio();
   ledController.begin();
-  display.clear(ILI9341_T4_COLOR_WHITE);
+  clearDisplay(ILI9341_T4_COLOR_WHITE);
 
+  //SD.begin(BUILTIN_SDCARD);
+  //loadSongFromXML("/musique.xml");
+  ///*
   currentSong.chordCount = 3;
 
   // Premier accord : Do majeur (C) sur la 5e corde, case 3
@@ -80,7 +83,7 @@ void setup() {
   chord3.notes[1] = Note(246.94f, 0.03f, CRGB::Red, 47, 5, 7);
   chord3.heightOfHand = 51;
   chord3.time = 2000;
-
+  //*/
   threads.addThread(UpdateDisplayThread);
   threads.addThread(UpdateAudioThread);
   threads.addThread(updateLedsThread);

@@ -1,15 +1,15 @@
 #include "DisplayManager.h"
 
-//DMAMEM uint16_t internal_fb[H * W]; //__attribute__((section(".dmadata")));
 
+ILI9341_T4::ILI9341Driver tft(PIN_CS, PIN_DC, PIN_SCK, PIN_MOSI, PIN_MISO, PIN_RESET, PIN_TOUCH_CS, PIN_TOUCH_IRQ);
 
-DisplayManager::DisplayManager()
-    : tft(PIN_CS, PIN_DC, PIN_SCK, PIN_MOSI, PIN_MISO, PIN_RESET, PIN_TOUCH_CS, PIN_TOUCH_IRQ),
-      diff1(), diff2()
-{
-}
+DMAMEM ILI9341_T4::DiffBuffStatic<6000> diff1;
+DMAMEM ILI9341_T4::DiffBuffStatic<6000> diff2;
 
-void DisplayManager::init() {
+DMAMEM uint16_t internal_fb[H * W]; 
+DMAMEM uint16_t fb[H * W]; 
+
+void initDisplay() {
     //tft.output(&Serial);                // output debug infos to serial port.  
     while (!tft.begin(SPI_SPEED_DISPLAY));      // init the display
     tft.setRotation(1);                 // start in portrait mode 240x320
@@ -18,11 +18,11 @@ void DisplayManager::init() {
     tft.setRefreshRate(90);  // start with a screen refresh rate around 40hz
 
 }
-void DisplayManager::clear(uint16_t color) {
+void clearDisplay(uint16_t color) {
     for (int i = 0; i < H * W; i++) fb[i] = color;
 }
 
-void DisplayManager::drawLine(int x0, int y0, int x1, int y1, int thickness, uint16_t color) {
+void drawLine(int x0, int y0, int x1, int y1, int thickness, uint16_t color) {
     int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
     int dy = abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
     int err = (dx > dy ? dx : -dy) / 2, e2;
@@ -48,7 +48,7 @@ void DisplayManager::drawLine(int x0, int y0, int x1, int y1, int thickness, uin
 }
 
 
-void DisplayManager::drawRectangle(int x, int y, int width, int height, int thickness, uint16_t color) {
+void drawRectangle(int x, int y, int width, int height, int thickness, uint16_t color) {
     for (int i = 0; i < thickness; i++) {
         drawLine(x, y + i, x + width - 1, y + i, 1, color);
         drawLine(x, y + height - 1 - i, x + width - 1, y + height - 1 - i, 1, color);
@@ -57,7 +57,7 @@ void DisplayManager::drawRectangle(int x, int y, int width, int height, int thic
     }
 }
 
-void DisplayManager::drawRectangleCentered(int x, int y, int width, int height, int thickness, uint16_t color) {
+void drawRectangleCentered(int x, int y, int width, int height, int thickness, uint16_t color) {
     
     // Calcul du coin supérieur gauche à partir du centre
     int startX = x - width / 2;
@@ -73,7 +73,7 @@ void DisplayManager::drawRectangleCentered(int x, int y, int width, int height, 
     }
 }
 
-void DisplayManager::drawCircle(int x, int y, int radius, uint16_t color, bool fill, int thickness) {
+void drawCircle(int x, int y, int radius, uint16_t color, bool fill, int thickness) {
     if (fill) {
         for (int i = -radius; i <= radius; i++) {
             for (int j = -radius; j <= radius; j++) {
@@ -124,7 +124,7 @@ void DisplayManager::drawCircle(int x, int y, int radius, uint16_t color, bool f
         }
     }
 }
-void DisplayManager::drawNote(int corde, int fret, bool fill, uint16_t color) {
+void drawNote(int corde, int fret, bool fill, uint16_t color) {
     int x, y;
     y = H - TOP_BORDER - (corde - 1) * CORDS_ECART;
     if (fret == 0) {
@@ -140,7 +140,7 @@ void DisplayManager::drawNote(int corde, int fret, bool fill, uint16_t color) {
     drawCircle(x, y, 10, color, fill, 1);
 }
 
-void DisplayManager::drawTabulation() {
+void drawTabulation() {
 
     drawRectangle(RIGHT_BORDER, BOTTOM_BORDER, W -(RIGHT_BORDER + LEFT_BORDER), H -(TOP_BORDER + BOTTOM_BORDER), 3, ILI9341_T4_COLOR_BLACK);
     
@@ -156,7 +156,7 @@ void DisplayManager::drawTabulation() {
     drawLine(RIGHT_BORDER + 3 * FRET_ECART, BOTTOM_BORDER, RIGHT_BORDER + 3 * FRET_ECART, H - TOP_BORDER - 1, 1, ILI9341_T4_COLOR_BLACK);
 }
 
-void DisplayManager::getNotePosition(int corde, int fret, int &x, int &y) {
+void getNotePosition(int corde, int fret, int &x, int &y) {
   y = W - LEFT_BORDER - (corde - 1) * CORDS_ECART;
   if (fret == 0) {
     x = H - TOP_BORDER;
@@ -167,6 +167,6 @@ void DisplayManager::getNotePosition(int corde, int fret, int &x, int &y) {
   }
 }
 
-void DisplayManager::update() {
+void updateDisplay() {
     tft.update(fb);
 }

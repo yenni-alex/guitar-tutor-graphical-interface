@@ -14,11 +14,10 @@ class Note {
 public:
     float freq;         // Fréquence de la note
     float threshold;    // Seuil de détection pour cette note
-    //uint16_t color;     // Couleur associée
     CRGB color;
-    int led;            // Numéro de la LED
-    int corde;          // Numéro de la corde
-    int caseFret;       // Numéro de la case
+    uint8_t led;            // Numéro de la LED
+    uint8_t corde;          // Numéro de la corde
+    uint8_t caseFret;       // Numéro de la case
     Note(float f = 0, float t = 0, CRGB c = 0, int l = -1, int co = -1, int ca = -1)
         : freq(f), threshold(t), color(c), led(l), corde(co), caseFret(ca) {}
 };

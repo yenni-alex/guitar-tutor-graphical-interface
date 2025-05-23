@@ -12,12 +12,12 @@ AudioConnection          patchCord2(i2s1, 0, recorder, 0);
 AudioConnection          patchCord3(i2s1, 0, rms, 0);
 AudioConnection          patchCord4(i2s1, 0, peak, 0);
 
-float32_t input_buffer[FFT_SIZE];
-float32_t fft_buffer[FFT_SIZE * 2];
+DMAMEM float32_t input_buffer[FFT_SIZE];
+DMAMEM float32_t fft_buffer[FFT_SIZE * 2];
 int sample_index = 0;
 bool ready_for_fft = false;
 
-Song currentSong;
+DMAMEM Song currentSong;
 volatile int currentPlayingChordIndex = 0;
 const int totalChords = Song::MAX_CHORDS;
 

@@ -55,35 +55,37 @@ void setup() {
   initAudio();
   ledController.begin();
   clearDisplay(ILI9341_T4_COLOR_WHITE);
-
-  //SD.begin(BUILTIN_SDCARD);
-  //loadSongFromXML("/musique.xml");
-  ///*
-  currentSong.chordCount = 3;
-
-  // Premier accord : Do majeur (C) sur la 5e corde, case 3
-  Chord& chord1 = currentSong.chords[0];
-  chord1.noteCount = 1;
-  chord1.notes[0] = Note(130.81f, 0.03f, CRGB::Red, 39, 5, 3); // freq, threshold, color, led, corde, caseFret
-  chord1.heightOfHand = 51;
-  chord1.time = 2000;
-
-  // Deuxième accord : Mi majeur (E) sur la 4e corde, case 2 et 3e corde, case 1
-  Chord& chord2 = currentSong.chords[1];
-  chord2.noteCount = 2;
-  chord2.notes[0] = Note(164.81f, 0.03f, CRGB::Green, 44, 4, 2);
-  chord2.notes[1] = Note(196.00f, 0.03f, CRGB::Green, 45, 3, 0);
-  chord2.heightOfHand = 51;
-  chord2.time = 2000;
-
-  // Troisième accord : La majeur (A) sur la 6e corde, case 5 et 5e corde, case 7
-  Chord& chord3 = currentSong.chords[2];
-  chord3.noteCount = 2;
-  chord3.notes[0] = Note(220.00f, 0.03f, CRGB::Red, 46, 6, 5);
-  chord3.notes[1] = Note(246.94f, 0.03f, CRGB::Red, 47, 5, 7);
-  chord3.heightOfHand = 51;
-  chord3.time = 2000;
-  //*/
+  delay(5000);
+  SD.begin(BUILTIN_SDCARD);
+  Serial.println("SD card initialized");
+  if (!SD.exists("/musique.xml")) {
+    Serial.println("Fichier musique.xml introuvable");
+    return;
+  }
+  loadSongFromXML("/musique.xml");
+  Serial.print("Accords lus: ");
+  Serial.println(currentSong.chordCount);
+  for (uint16_t i = 0; i < currentSong.chordCount; ++i) {
+    Serial.print("Chord "); Serial.print(i); Serial.print(" notes: "); Serial.println(currentSong.chords[i].noteCount);
+    for (uint8_t j = 0; j < currentSong.chords[i].noteCount; ++j) {
+      Serial.print("  Note "); Serial.print(j);
+      Serial.print(" freq: "); Serial.print(currentSong.chords[i].notes[j].freq);
+      Serial.print(" led: "); Serial.print(currentSong.chords[i].notes[j].led);
+      Serial.print(" color: "); Serial.print(currentSong.chords[i].notes[j].color.r, HEX);
+      Serial.print(currentSong.chords[i].notes[j].color.g, HEX);
+      Serial.print(currentSong.chords[i].notes[j].color.b, HEX);
+      Serial.println();
+    }
+  }
+  // Affiche le premier accord dès le début
+  ledController.clear();
+  if (currentSong.chordCount > 0) {
+    Chord& chord = currentSong.chords[0];
+    for (uint8_t i = 0; i < chord.noteCount; ++i) {
+      ledController.setLed(chord.notes[i].led, chord.notes[i].color);
+    }
+    ledController.show();
+  }
   threads.addThread(UpdateDisplayThread);
   threads.addThread(UpdateAudioThread);
   threads.addThread(updateLedsThread);

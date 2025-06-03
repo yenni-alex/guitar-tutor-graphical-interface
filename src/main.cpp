@@ -12,6 +12,11 @@ void UpdateDisplayThread() {
   while (true) {
     clearDisplay(ILI9341_T4_COLOR_GREEN);
     drawTabulation();
+    if (currentPlayingChordIndex < currentSong.chordCount) {
+      Chord& chord = currentSong.chords[currentPlayingChordIndex];
+      
+      drawNote(chord.notes->corde, chord.notes->caseFret, true, chord.notes->color);
+    }
     updateDisplay();
     threads.delay(20);
   }
@@ -58,11 +63,11 @@ void setup() {
   delay(5000);
   SD.begin(BUILTIN_SDCARD);
   Serial.println("SD card initialized");
-  if (!SD.exists("/musique.xml")) {
-    Serial.println("Fichier musique.xml introuvable");
+  if (!SD.exists("/test.xml")) {
+    Serial.println("Fichier test.xml introuvable");
     return;
   }
-  loadSongFromXML("/musique.xml");
+  loadSongFromXML("/test.xml");
   Serial.print("Accords lus: ");
   Serial.println(currentSong.chordCount);
   for (uint16_t i = 0; i < currentSong.chordCount; ++i) {

@@ -47,6 +47,9 @@ void updateLedsThread() {
             for (uint8_t i = 0; i < chord.noteCount; ++i) {
                 ledController.setLed(chord.notes[i].led, chord.notes[i].color);
             }
+            for (uint8_t i = NUM_LEDS - 1; i >= chord.heightOfHand; --i) {
+                ledController.setLed(i, CRGB::Yellow); // ALLUME les LEDs au-dessus de la hauteur de la main
+            }
             ledController.show();
             oldChordIndex = currentPlayingChordIndex;
         }

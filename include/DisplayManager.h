@@ -6,6 +6,16 @@
 #include <ILI9341_T4.h>
 #include <TouchScreen.h>
 #include "Config.h"
+#include "AudioProcessor.h"
+
+struct IconButton {
+  int x, y;         // position coin haut-gauche
+  int size;         // taille (carré pour simplifier)
+  void (*onClick)(); // fonction appelée quand on clique dessus
+
+  IconButton(int x_, int y_, int size_, void (*onClick_)()) 
+    : x(x_), y(y_), size(size_), onClick(onClick_) {}
+};
 
 void checkTouch();
 

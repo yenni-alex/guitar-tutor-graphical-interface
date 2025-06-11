@@ -10,6 +10,14 @@ DMAMEM ILI9341_T4::DiffBuffStatic<6000> diff2;
 DMAMEM uint16_t internal_fb[H * W]; 
 DMAMEM uint16_t fb[H * W]; 
 
+void onRestart() {
+  Serial.println("Restart clicked");
+  currentPlayingChordIndex = 0; // Réinitialiser l'index du chord en cours
+  // ici ton code restart
+}
+
+IconButton restart(120, 0, 48, onRestart); // Bouton de redémarrage
+
 // Fonction de map + inversion des axes
 void mapTouchToScreen(int raw_x, int raw_y, int &screen_x, int &screen_y) {
     // Inversion des axes : X tactile -> Y écran, Y tactile -> X écran
@@ -24,13 +32,15 @@ void mapTouchToScreen(int raw_x, int raw_y, int &screen_x, int &screen_y) {
 void checkTouch() {
     TSPoint p = ts.getPoint();
     if (p.z > 100) { // Adjust threshold as needed
-        //int x = map(p.x, 0, 240, 0, W);
-        //int y = map(p.y, 0, 320, 0, H);
         int x, y;
         // Map touch coordinates to screen coordinates
         mapTouchToScreen(p.x, p.y, x, y);
         // Handle touch event
         Serial.printf("Touched at: (%d, %d)\n", x, y);
+        if(x >= restart.x && x <= restart.x + restart.size &&
+           y >= restart.y && y <= restart.y + restart.size) {
+            restart.onClick(); // Call the restart function if the button is touched
+        }
         // Add your touch handling logic here
         
     }

@@ -4,8 +4,11 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include <ILI9341_T4.h>
+#include <TouchScreen.h>
 #include "Config.h"
-    
+
+void checkTouch();
+
 void initDisplay();
 void clearDisplay(uint16_t color = 0);
 void drawIcon(int x, int y, const uint16_t* icon, int w, int h);

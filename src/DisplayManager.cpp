@@ -2,6 +2,7 @@
 
 
 ILI9341_T4::ILI9341Driver tft(PIN_CS, PIN_DC, PIN_SCK, PIN_MOSI, PIN_MISO, PIN_RESET, PIN_TOUCH_CS, PIN_TOUCH_IRQ);
+TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
 DMAMEM ILI9341_T4::DiffBuffStatic<6000> diff1;
 DMAMEM ILI9341_T4::DiffBuffStatic<6000> diff2;
@@ -9,7 +10,31 @@ DMAMEM ILI9341_T4::DiffBuffStatic<6000> diff2;
 DMAMEM uint16_t internal_fb[H * W]; 
 DMAMEM uint16_t fb[H * W]; 
 
+// Fonction de map + inversion des axes
+void mapTouchToScreen(int raw_x, int raw_y, int &screen_x, int &screen_y) {
+    // Inversion des axes : X tactile -> Y écran, Y tactile -> X écran
+    screen_x = map(raw_y, TS_MINY, TS_MAXY, 0, W);
+    screen_y = map(raw_x, TS_MINX, TS_MAXX, H, 0);
+    
+    // Limiter les débordements éventuels
+    screen_x = constrain(screen_x, 0, W - 1);
+    screen_y = constrain(screen_y, 0, H - 1);
+}
 
+void checkTouch() {
+    TSPoint p = ts.getPoint();
+    if (p.z > 100) { // Adjust threshold as needed
+        //int x = map(p.x, 0, 240, 0, W);
+        //int y = map(p.y, 0, 320, 0, H);
+        int x, y;
+        // Map touch coordinates to screen coordinates
+        mapTouchToScreen(p.x, p.y, x, y);
+        // Handle touch event
+        Serial.printf("Touched at: (%d, %d)\n", x, y);
+        // Add your touch handling logic here
+        
+    }
+}
 
 uint16_t RGB24_to_RGB565(uint32_t color24) {
     uint8_t r = (color24 >> 16) & 0xFF;
@@ -32,7 +57,7 @@ void initDisplay() {
     tft.setFramebuffer(internal_fb);    // set the internal framebuffer (enables double buffering)
     tft.setDiffBuffers(&diff1, &diff2); // set 2 diff buffers -> enables diffenrential updates. 
     tft.setRefreshRate(90);  // start with a screen refresh rate around 40hz
-
+    
 }
 void clearDisplay(uint16_t color) {
     for (int i = 0; i < H * W; i++) fb[i] = color;

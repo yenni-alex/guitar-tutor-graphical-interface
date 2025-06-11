@@ -12,6 +12,15 @@
 #define PIN_TOUCH_IRQ 255   // optional. set this only if the touchscreen is connected on the same SPI bus
 #define PIN_TOUCH_CS  255   // optional. set this only if the touchscreen is connected on the same spi bus
 
+#define YP 39  // must be an analog pin, use "An" notation!
+#define XM 40  // must be an analog pin, use "An" notation!
+#define YM 34   // can be a digital pin
+#define XP 33   // can be a digital pin
+#define TS_MINX 130 // touch screen calibration values
+#define TS_MAXX 900 
+#define TS_MINY 100
+#define TS_MAXY 900
+
 #define H 240    // screen dimension
 #define W 320
 #define TOP_BORDER 50    // set borders

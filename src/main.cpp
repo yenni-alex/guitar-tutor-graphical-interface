@@ -13,6 +13,8 @@ uint32_t CRGBtoUint32(const CRGB & color) {
     return ((uint32_t)color.r << 16) | ((uint32_t)color.g << 8) | ((uint32_t)color.b);
 }
 
+
+
 void UpdateDisplayThread() {
   while (true) {
     clearDisplay(ILI9341_T4_COLOR_WHITE);
@@ -29,9 +31,10 @@ void UpdateDisplayThread() {
       drawNote(chord.notes->corde, chord.notes->caseFret, true, color565);
 
     }
+    checkTouch();
     updateDisplay();
     //threads.delay(20);
-    threads.delay(500);
+    threads.delay(100);
   }
 }
 

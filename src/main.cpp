@@ -21,6 +21,7 @@ void UpdateDisplayThread() {
     drawIcon(W - 100, 0, pause_icon, 48, 48); // pause
     drawIcon(W - 150, 0, stop_icon, 48, 48); // stop
     drawIcon(W - 200, 0, restart_icon, 48, 48); // rewind
+    drawIcon(0, H - 50, settings_icon, 48, 48); // next
     if (currentPlayingChordIndex < currentSong.chordCount) {
       Chord& chord = currentSong.chords[currentPlayingChordIndex];
       uint32_t color24 = CRGBtoUint32(chord.notes->color);

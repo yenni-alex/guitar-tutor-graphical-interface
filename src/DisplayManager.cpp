@@ -38,6 +38,18 @@ void clearDisplay(uint16_t color) {
     for (int i = 0; i < H * W; i++) fb[i] = color;
 }
 
+void drawIcon(int x, int y, const uint16_t* icon, int w, int h) {
+    for (int j = 0; j < h; j++) {
+        for (int i = 0; i < w; i++) {
+            int px = x + i;
+            int py = y + j;
+            if (px >= 0 && px < W && py >= 0 && py < H) {
+                fb[py * W + px] = icon[j * w + i];
+            }
+        }
+    }
+}
+
 void drawLine(int x0, int y0, int x1, int y1, int thickness, uint16_t color) {
     int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
     int dy = abs(y1 - y0), sy = y0 < y1 ? 1 : -1;

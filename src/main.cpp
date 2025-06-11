@@ -4,6 +4,7 @@
 #include "AudioProcessor.h"
 #include "LedController.h"
 #include "xml.h"
+#include "Icons.h"
 #include <TeensyThreads.h>
 
 LedController ledController;
@@ -16,6 +17,10 @@ void UpdateDisplayThread() {
   while (true) {
     clearDisplay(ILI9341_T4_COLOR_WHITE);
     drawTabulation();
+    drawIcon(W - 50, 0, play_icon, 48, 48); // play
+    drawIcon(W - 100, 0, pause_icon, 48, 48); // pause
+    drawIcon(W - 150, 0, stop_icon, 48, 48); // stop
+    drawIcon(W - 200, 0, restart_icon, 48, 48); // rewind
     if (currentPlayingChordIndex < currentSong.chordCount) {
       Chord& chord = currentSong.chords[currentPlayingChordIndex];
       uint32_t color24 = CRGBtoUint32(chord.notes->color);

@@ -8,17 +8,24 @@
 
 LedController ledController;
 
+uint32_t CRGBtoUint32(const CRGB & color) {
+    return ((uint32_t)color.r << 16) | ((uint32_t)color.g << 8) | ((uint32_t)color.b);
+}
+
 void UpdateDisplayThread() {
   while (true) {
-    clearDisplay(ILI9341_T4_COLOR_GREEN);
+    clearDisplay(ILI9341_T4_COLOR_WHITE);
     drawTabulation();
     if (currentPlayingChordIndex < currentSong.chordCount) {
       Chord& chord = currentSong.chords[currentPlayingChordIndex];
-      
-      drawNote(chord.notes->corde, chord.notes->caseFret, true, chord.notes->color);
+      uint32_t color24 = CRGBtoUint32(chord.notes->color);
+      uint16_t color565 = RGB24_to_RGB565(color24);
+      drawNote(chord.notes->corde, chord.notes->caseFret, true, color565);
+
     }
     updateDisplay();
-    threads.delay(20);
+    //threads.delay(20);
+    threads.delay(500);
   }
 }
 

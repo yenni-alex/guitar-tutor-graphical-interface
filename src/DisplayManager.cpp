@@ -9,6 +9,22 @@ DMAMEM ILI9341_T4::DiffBuffStatic<6000> diff2;
 DMAMEM uint16_t internal_fb[H * W]; 
 DMAMEM uint16_t fb[H * W]; 
 
+
+
+uint16_t RGB24_to_RGB565(uint32_t color24) {
+    uint8_t r = (color24 >> 16) & 0xFF;
+    uint8_t g = (color24 >> 8) & 0xFF;
+    uint8_t b = color24 & 0xFF;
+
+    uint16_t r5 = (r * 31 + 15) / 255;
+    uint16_t g6 = (g * 63 + 31) / 255;
+    uint16_t b5 = (b * 31 + 15) / 255;
+
+    uint16_t color565 = (r5 << 11) | (g6 << 5) | b5;
+
+    return color565;  // PAS DE SWAP !!!
+}
+
 void initDisplay() {
     //tft.output(&Serial);                // output debug infos to serial port.  
     while (!tft.begin(SPI_SPEED_DISPLAY));      // init the display
@@ -137,7 +153,7 @@ void drawNote(int corde, int fret, bool fill, uint16_t color) {
         x = W - LEFT_BORDER - 0.5 * FRET_ECART - (fret - 1) * FRET_ECART;
     }
 
-    drawCircle(x, y, 10, color, fill, 1);
+    drawCircle(x, y, 10,color, fill, 1);
 }
 
 void drawTabulation() {
@@ -170,3 +186,6 @@ void getNotePosition(int corde, int fret, int &x, int &y) {
 void updateDisplay() {
     tft.update(fb);
 }
+
+
+

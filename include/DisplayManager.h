@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <ILI9341_T4.h>
 #include "Config.h"
-
     
 void initDisplay();
 void clearDisplay(uint16_t color = 0);
@@ -17,6 +16,7 @@ void drawNote(int corde, int fret, bool fill, uint16_t color);
 void drawTabulation();
 void getNotePosition(int corde, int fret, int &x, int &y);
 void updateDisplay();
+uint16_t RGB24_to_RGB565(uint32_t color);
     
 
 

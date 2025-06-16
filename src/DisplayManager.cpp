@@ -10,159 +10,7 @@ DMAMEM ILI9341_T4::DiffBuffStatic<6000> diff2;
 DMAMEM uint16_t internal_fb[H * W]; 
 DMAMEM uint16_t fb[H * W]; 
 
-        // UI.cpp
-// Gestion des widgets (internes au module)
-static Widget widgets[MAX_WIDGETS];
-static int widgetCount = 0;
-
-// Gestion de l'écran courant
-static Screen* currentScreen = nullptr;
-
-// Déclaration des écrans
-Screen resumeScreen = { drawResumeScreen, handleTouchResumeScreen };
-Screen loadScreen = { drawLoadScreen, handleTouchLoadScreen };
-Screen optionsScreen = { drawOptionsScreen, handleTouchOptionsScreen };
-Screen menuScreen = { drawMenuScreen, handleTouchMenuScreen };
-
-// Fonctions DRAW de chaque SCREEN
-void drawResumeScreen() {
-    setupResumeScreen(); // Setup les boutons de reprise
-    drawWidgets();
-}
-void drawLoadScreen() {
-    setupLoadScreen(); // Setup les boutons de chargement
-    drawWidgets();
-}
-void drawOptionsScreen() {
-    setupOptionsScreen(); // Setup les options
-    drawWidgets();
-}
-void drawMenuScreen() {
-    setupMenuScreen(); // Setup les boutons du menu
-    drawWidgets();
-}
-// Fonctions de gestion des touches pour chaque SCREEN
-void handleTouchResumeScreen(int x, int y) {
-    handleTouchWidgets(x, y);
-}
-void handleTouchLoadScreen(int x, int y) {
-    handleTouchWidgets(x, y);
-}
-void handleTouchOptionsScreen(int x, int y) {
-    handleTouchWidgets(x, y);
-}
-void handleTouchMenuScreen(int x, int y) {
-    handleTouchWidgets(x, y);
-}
-
-// === Callbacks des boutons ===
-void onResumePressed() { setScreen(&resumeScreen); }
-void onLoadPressed()    { setScreen(&loadScreen); }
-void onOptionsPressed() { setScreen(&optionsScreen); }
-void onBackToMenu() { setScreen(&menuScreen); }
-
-// === Setup du MenuScreen ===
-void setupMenuScreen() {
-    clearWidgets();
-    clearDisplay(ILI9341_T4_COLOR_PURPLE);
-
-    Widget resumeButton = {
-        BUTTON_X, BUTTON_START_Y, BUTTON_WIDTH, BUTTON_HEIGHT,
-        onResumePressed,
-        [](){
-            drawRectangle(BUTTON_X, BUTTON_START_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_BLUE);
-        }
-    };
-    addWidget(resumeButton);
-
-    Widget loadButton = {
-        BUTTON_X, BUTTON_START_Y + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT,
-        onLoadPressed,
-        [](){
-            drawRectangle(BUTTON_X, BUTTON_START_Y + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_YELLOW);
-        }
-    };
-    addWidget(loadButton);
-
-    Widget optionsButton = {
-        BUTTON_X, BUTTON_START_Y + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT,
-        onOptionsPressed,
-        [](){
-            drawRectangle(BUTTON_X, BUTTON_START_Y + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_RED);
-        }
-    };
-    addWidget(optionsButton);
-}
-void setupResumeScreen() {
-    clearWidgets();
-    clearDisplay(ILI9341_T4_COLOR_BLUE);
-    addBackButton();
-}
-void setupLoadScreen() {
-    clearWidgets();
-    clearDisplay(ILI9341_T4_COLOR_YELLOW);
-    addBackButton();
-}
-void setupOptionsScreen() {
-    clearWidgets();
-    clearDisplay(ILI9341_T4_COLOR_RED);
-    addBackButton();
-}
-
-
-void addBackButton() {
-    Widget backButton = { 10, 10, 80, 40, onBackToMenu, [](){
-        drawRectangle(10, 10, 80, 40, 2, 0xFFFF);
-    }};
-    addWidget(backButton);
-}
-// Implémentation des widgets
-void addWidget(Widget w) {
-    if (widgetCount < MAX_WIDGETS) {
-        widgets[widgetCount++] = w;
-    }
-}
-
-void clearWidgets() {
-    widgetCount = 0;
-}
-
-void drawWidgets() {
-    for (int i = 0; i < widgetCount; i++) {
-        if (widgets[i].draw) widgets[i].draw();
-    }
-}
-
-void handleTouchWidgets(int x, int y) {
-    for (int i = 0; i < widgetCount; i++) {
-        if (x >= widgets[i].x && x <= widgets[i].x + widgets[i].w &&
-            y >= widgets[i].y && y <= widgets[i].y + widgets[i].h) {
-            if (widgets[i].onPress) widgets[i].onPress();
-        }
-    }
-}
-
-// Implémentation des écrans
-void setScreen(Screen* screen) {
-    // clearWidgets(); // POSE PRBLM
-    currentScreen = screen;
-    if (currentScreen) currentScreen->draw();
-}
-
-void updateUI() {
-    if (currentScreen) {
-        currentScreen->draw();
-    }
-}
-
-void handleTouchUI(int x, int y) {
-    if (currentScreen) {
-        currentScreen->handleTouch(x, y);
-    }
-}
-//      FIN de UI.cpp
-// fin de structe TODO a tester encore et adapter
-void onRestart() {
+void onRestart() { // TODO mettre dans UI
   Serial.println("Restart clicked");
   currentPlayingChordIndex = 0; // Réinitialiser l'index du chord en cours
 }
@@ -184,35 +32,15 @@ void drawButtons() {
 }
 // Fonction de map + inversion des axes
 void mapTouchToScreen(int raw_x, int raw_y, int &screen_x, int &screen_y) {
-    // Inversion des axes : X tactile -> Y écran, Y tactile -> X écran
-    screen_x = map(raw_y, TS_MINY, TS_MAXY, 0, W);
-    screen_y = map(raw_x, TS_MINX, TS_MAXX, H, 0);
-    
+    // Inversion des axes : X tactile -> -Y écran, Y tactile -> X écran (Pour rotation 1)
+    //screen_x = map(raw_y, TS_MINY, TS_MAXY, 0, W);
+    //screen_y = map(raw_x, TS_MINX, TS_MAXX, H, 0);
+    // Inversion des axes : X tactile -> Y écran, Y tactile -> -X écran (Pour rotation 3 et text à l'endroit)
+    screen_x = map(raw_y, TS_MINY, TS_MAXY, W, 0);
+    screen_y = map(raw_x, TS_MINX, TS_MAXX, 0, H);
     // Limiter les débordements éventuels
     screen_x = constrain(screen_x, 0, W - 1);
     screen_y = constrain(screen_y, 0, H - 1);
-}
-
-void checkTouch() {
-    TSPoint p = ts.getPoint();
-    if (p.z > 100) { // Adjust threshold as needed
-        int x, y;
-        // Map touch coordinates to screen coordinates
-        mapTouchToScreen(p.x, p.y, x, y);
-        // Handle touch event
-        Serial.printf("Touched at: (%d, %d)\n", x, y);
-        handleTouchUI(x, y); // TEST UI
-        //if(x >= restart.x && x <= restart.x + restart.size &&
-        //   y >= restart.y && y <= restart.y + restart.size) {
-        //    restart.onClick(); // Call the restart function if the button is touched
-        //}
-        //if(x >= settings.x && x <= settings.x + settings.size &&
-        //   y >= settings.y && y <= settings.y + settings.size) {
-        //    settings.onClick(); // Call the settings function if the button is touched
-        //}
-        // Add your touch handling logic here
-        
-    }
 }
 
 uint16_t RGB24_to_RGB565(uint32_t color24) {
@@ -232,7 +60,7 @@ uint16_t RGB24_to_RGB565(uint32_t color24) {
 void initDisplay() {
     //tft.output(&Serial);                // output debug infos to serial port.  
     while (!tft.begin(SPI_SPEED_DISPLAY));      // init the display
-    tft.setRotation(1);                 // start in portrait mode 240x320
+    tft.setRotation(3);                 // 3 pour que le texte soit à l'endroit (landscape 320x240) TODO: voir si ca fou pas trop la merde dans drawTAB
     tft.setFramebuffer(internal_fb);    // set the internal framebuffer (enables double buffering)
     tft.setDiffBuffers(&diff1, &diff2); // set 2 diff buffers -> enables diffenrential updates. 
     tft.setRefreshRate(90);  // start with a screen refresh rate around 40hz
@@ -397,6 +225,13 @@ void getNotePosition(int corde, int fret, int &x, int &y) {
   } else {
     x = H - TOP_BORDER - 0.5 * FRET_ECART - (fret - 1) * FRET_ECART;
   }
+}
+
+void writeText(int x, int y, const char* text, uint16_t color, int fontSize) {
+    
+    //tft.overlayText(fb, text, 0, 0, 10, 65535U, 0.3f, 31U, false);  
+    tft.overlayText(fb, "Game of life demo", 2, 0, 14, ILI9341_T4_COLOR_WHITE, 1.0f, ILI9341_T4_COLOR_RED, 0.3f, 1); // draw text    
+
 }
 
 void updateDisplay() {

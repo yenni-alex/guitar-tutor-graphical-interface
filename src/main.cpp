@@ -1,10 +1,11 @@
 #include <Arduino.h>
-#include "DisplayManager.h"
+//#include "DisplayManager.h"
 #include "Config.h"
 #include "AudioProcessor.h"
 #include "LedController.h"
 #include "xml.h"
 #include "Icons.h"
+#include "UI.h"
 #include <TeensyThreads.h>
 
 LedController ledController;
@@ -118,7 +119,6 @@ void setup() {
   setScreen(&menuScreen);
   updateUI();
   // FIN TEST UI
-
 
   threads.addThread(UpdateDisplayThread);
   threads.addThread(UpdateAudioThread);

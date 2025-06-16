@@ -10,14 +10,178 @@ DMAMEM ILI9341_T4::DiffBuffStatic<6000> diff2;
 DMAMEM uint16_t internal_fb[H * W]; 
 DMAMEM uint16_t fb[H * W]; 
 
+        // UI.cpp
+// Gestion des widgets (internes au module)
+static Widget widgets[MAX_WIDGETS];
+static int widgetCount = 0;
+
+// Gestion de l'écran courant
+static Screen* currentScreen = nullptr;
+
+// Déclaration des écrans
+Screen resumeScreen = { drawResumeScreen, handleTouchResumeScreen };
+Screen loadScreen = { drawLoadScreen, handleTouchLoadScreen };
+Screen optionsScreen = { drawOptionsScreen, handleTouchOptionsScreen };
+Screen menuScreen = { drawMenuScreen, handleTouchMenuScreen };
+
+// Fonctions DRAW de chaque SCREEN
+void drawResumeScreen() {
+    setupResumeScreen(); // Setup les boutons de reprise
+    drawWidgets();
+}
+void drawLoadScreen() {
+    setupLoadScreen(); // Setup les boutons de chargement
+    drawWidgets();
+}
+void drawOptionsScreen() {
+    setupOptionsScreen(); // Setup les options
+    drawWidgets();
+}
+void drawMenuScreen() {
+    setupMenuScreen(); // Setup les boutons du menu
+    drawWidgets();
+}
+// Fonctions de gestion des touches pour chaque SCREEN
+void handleTouchResumeScreen(int x, int y) {
+    handleTouchWidgets(x, y);
+}
+void handleTouchLoadScreen(int x, int y) {
+    handleTouchWidgets(x, y);
+}
+void handleTouchOptionsScreen(int x, int y) {
+    handleTouchWidgets(x, y);
+}
+void handleTouchMenuScreen(int x, int y) {
+    handleTouchWidgets(x, y);
+}
+
+// === Callbacks des boutons ===
+void onResumePressed() { setScreen(&resumeScreen); }
+void onLoadPressed()    { setScreen(&loadScreen); }
+void onOptionsPressed() { setScreen(&optionsScreen); }
+void onBackToMenu() { setScreen(&menuScreen); }
+
+// === Setup du MenuScreen ===
+void setupMenuScreen() {
+    clearWidgets();
+    clearDisplay(ILI9341_T4_COLOR_PURPLE);
+
+    Widget resumeButton = {
+        BUTTON_X, BUTTON_START_Y, BUTTON_WIDTH, BUTTON_HEIGHT,
+        onResumePressed,
+        [](){
+            drawRectangle(BUTTON_X, BUTTON_START_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_BLUE);
+        }
+    };
+    addWidget(resumeButton);
+
+    Widget loadButton = {
+        BUTTON_X, BUTTON_START_Y + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT,
+        onLoadPressed,
+        [](){
+            drawRectangle(BUTTON_X, BUTTON_START_Y + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_YELLOW);
+        }
+    };
+    addWidget(loadButton);
+
+    Widget optionsButton = {
+        BUTTON_X, BUTTON_START_Y + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT,
+        onOptionsPressed,
+        [](){
+            drawRectangle(BUTTON_X, BUTTON_START_Y + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_RED);
+        }
+    };
+    addWidget(optionsButton);
+}
+void setupResumeScreen() {
+    clearWidgets();
+    clearDisplay(ILI9341_T4_COLOR_BLUE);
+    addBackButton();
+}
+void setupLoadScreen() {
+    clearWidgets();
+    clearDisplay(ILI9341_T4_COLOR_YELLOW);
+    addBackButton();
+}
+void setupOptionsScreen() {
+    clearWidgets();
+    clearDisplay(ILI9341_T4_COLOR_RED);
+    addBackButton();
+}
+
+
+void addBackButton() {
+    Widget backButton = { 10, 10, 80, 40, onBackToMenu, [](){
+        drawRectangle(10, 10, 80, 40, 2, 0xFFFF);
+    }};
+    addWidget(backButton);
+}
+// Implémentation des widgets
+void addWidget(Widget w) {
+    if (widgetCount < MAX_WIDGETS) {
+        widgets[widgetCount++] = w;
+    }
+}
+
+void clearWidgets() {
+    widgetCount = 0;
+}
+
+void drawWidgets() {
+    for (int i = 0; i < widgetCount; i++) {
+        if (widgets[i].draw) widgets[i].draw();
+    }
+}
+
+void handleTouchWidgets(int x, int y) {
+    for (int i = 0; i < widgetCount; i++) {
+        if (x >= widgets[i].x && x <= widgets[i].x + widgets[i].w &&
+            y >= widgets[i].y && y <= widgets[i].y + widgets[i].h) {
+            if (widgets[i].onPress) widgets[i].onPress();
+        }
+    }
+}
+
+// Implémentation des écrans
+void setScreen(Screen* screen) {
+    // clearWidgets(); // POSE PRBLM
+    currentScreen = screen;
+    if (currentScreen) currentScreen->draw();
+}
+
+void updateUI() {
+    if (currentScreen) {
+        currentScreen->draw();
+    }
+}
+
+void handleTouchUI(int x, int y) {
+    if (currentScreen) {
+        currentScreen->handleTouch(x, y);
+    }
+}
+//      FIN de UI.cpp
+// fin de structe TODO a tester encore et adapter
 void onRestart() {
   Serial.println("Restart clicked");
   currentPlayingChordIndex = 0; // Réinitialiser l'index du chord en cours
-  // ici ton code restart
+}
+void onSettings() {
+  Serial.println("Settings clicked");
+    // Implémentez la logique pour ouvrir les paramètres
+    
 }
 
 IconButton restart(120, 0, 48, onRestart); // Bouton de redémarrage
+IconButton settings(0, 190, 48, onSettings); // Bouton de paramètres
 
+void drawButtons() {
+    drawIcon(W - 50, 0, play_icon, 48, 48); // play
+    drawIcon(W - 100, 0, pause_icon, 48, 48); // pause
+    drawIcon(W - 150, 0, stop_icon, 48, 48); // stop
+    drawIcon(W - 200, 0, restart_icon, 48, 48); // restart
+    drawIcon(0, H - 50, settings_icon, 48, 48); // settings
+}
 // Fonction de map + inversion des axes
 void mapTouchToScreen(int raw_x, int raw_y, int &screen_x, int &screen_y) {
     // Inversion des axes : X tactile -> Y écran, Y tactile -> X écran
@@ -37,10 +201,15 @@ void checkTouch() {
         mapTouchToScreen(p.x, p.y, x, y);
         // Handle touch event
         Serial.printf("Touched at: (%d, %d)\n", x, y);
-        if(x >= restart.x && x <= restart.x + restart.size &&
-           y >= restart.y && y <= restart.y + restart.size) {
-            restart.onClick(); // Call the restart function if the button is touched
-        }
+        handleTouchUI(x, y); // TEST UI
+        //if(x >= restart.x && x <= restart.x + restart.size &&
+        //   y >= restart.y && y <= restart.y + restart.size) {
+        //    restart.onClick(); // Call the restart function if the button is touched
+        //}
+        //if(x >= settings.x && x <= settings.x + settings.size &&
+        //   y >= settings.y && y <= settings.y + settings.size) {
+        //    settings.onClick(); // Call the settings function if the button is touched
+        //}
         // Add your touch handling logic here
         
     }

@@ -17,24 +17,27 @@ uint32_t CRGBtoUint32(const CRGB & color) {
 
 void UpdateDisplayThread() {
   while (true) {
-    clearDisplay(ILI9341_T4_COLOR_WHITE);
-    drawTabulation();
-    drawIcon(W - 50, 0, play_icon, 48, 48); // play
-    drawIcon(W - 100, 0, pause_icon, 48, 48); // pause
-    drawIcon(W - 150, 0, stop_icon, 48, 48); // stop
-    drawIcon(W - 200, 0, restart_icon, 48, 48); // rewind
-    drawIcon(0, H - 50, settings_icon, 48, 48); // next
-    if (currentPlayingChordIndex < currentSong.chordCount) {
-      Chord& chord = currentSong.chords[currentPlayingChordIndex];
-      uint32_t color24 = CRGBtoUint32(chord.notes->color);
-      uint16_t color565 = RGB24_to_RGB565(color24);
-      drawNote(chord.notes->corde, chord.notes->caseFret, true, color565);
-
-    }
+    //clearDisplay(ILI9341_T4_COLOR_WHITE);
+    //drawTabulation();
+    //drawButtons();
+//
+    //if (currentPlayingChordIndex < currentSong.chordCount) {
+    //  Chord& chord = currentSong.chords[currentPlayingChordIndex];
+    //  uint32_t color24 = CRGBtoUint32(chord.notes->color);
+    //  uint16_t color565 = RGB24_to_RGB565(color24);
+    //  drawNote(chord.notes->corde, chord.notes->caseFret, true, color565);
+//
+    //}
+    //checkTouch();
+    //updateDisplay();
+    
+    // TEST UI
+    //updateUI();
+    // Gestion tactile ici
     checkTouch();
     updateDisplay();
-    //threads.delay(20);
-    threads.delay(100);
+    // FIN TEST UI
+    threads.delay(20);
   }
 }
 
@@ -110,6 +113,13 @@ void setup() {
     }
     ledController.show();
   }
+
+
+  setScreen(&menuScreen);
+  updateUI();
+  // FIN TEST UI
+
+
   threads.addThread(UpdateDisplayThread);
   threads.addThread(UpdateAudioThread);
   threads.addThread(updateLedsThread);

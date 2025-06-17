@@ -202,18 +202,18 @@ void drawNote(int corde, int fret, bool fill, uint16_t color) {
 
 void drawTabulation() {
 
-    drawRectangle(RIGHT_BORDER, BOTTOM_BORDER, W -(RIGHT_BORDER + LEFT_BORDER), H -(TOP_BORDER + BOTTOM_BORDER), 3, ILI9341_T4_COLOR_BLACK);
+    drawRectangle(LEFT_BORDER, BOTTOM_BORDER, W -(RIGHT_BORDER + LEFT_BORDER), H -(TOP_BORDER + BOTTOM_BORDER), 3, ILI9341_T4_COLOR_BLACK);
     
     // cords lines
-    drawLine(RIGHT_BORDER, BOTTOM_BORDER + CORDS_ECART, W - LEFT_BORDER - 1, BOTTOM_BORDER + CORDS_ECART, 3, ILI9341_T4_COLOR_BLACK);
-    drawLine(RIGHT_BORDER, BOTTOM_BORDER + 2 * CORDS_ECART, W - LEFT_BORDER - 1, BOTTOM_BORDER + 2 * CORDS_ECART, 3, ILI9341_T4_COLOR_BLACK);
-    drawLine(RIGHT_BORDER, BOTTOM_BORDER + 3 * CORDS_ECART, W - LEFT_BORDER - 1, BOTTOM_BORDER + 3 * CORDS_ECART, 3, ILI9341_T4_COLOR_BLACK);
-    drawLine(RIGHT_BORDER, BOTTOM_BORDER + 4 * CORDS_ECART, W - LEFT_BORDER - 1, BOTTOM_BORDER + 4 * CORDS_ECART, 3, ILI9341_T4_COLOR_BLACK);
+    drawLine(LEFT_BORDER, BOTTOM_BORDER + CORDS_ECART, W - RIGHT_BORDER - 1, BOTTOM_BORDER + CORDS_ECART, 3, ILI9341_T4_COLOR_BLACK);
+    drawLine(LEFT_BORDER, BOTTOM_BORDER + 2 * CORDS_ECART, W - RIGHT_BORDER - 1, BOTTOM_BORDER + 2 * CORDS_ECART, 3, ILI9341_T4_COLOR_BLACK);
+    drawLine(LEFT_BORDER, BOTTOM_BORDER + 3 * CORDS_ECART, W - RIGHT_BORDER - 1, BOTTOM_BORDER + 3 * CORDS_ECART, 3, ILI9341_T4_COLOR_BLACK);
+    drawLine(LEFT_BORDER, BOTTOM_BORDER + 4 * CORDS_ECART, W - RIGHT_BORDER - 1, BOTTOM_BORDER + 4 * CORDS_ECART, 3, ILI9341_T4_COLOR_BLACK);
 
     // frets lines
-    drawLine(RIGHT_BORDER + FRET_ECART, BOTTOM_BORDER, RIGHT_BORDER + FRET_ECART, H - TOP_BORDER - 1, 1, ILI9341_T4_COLOR_BLACK);
-    drawLine(RIGHT_BORDER + 2 * FRET_ECART, BOTTOM_BORDER, RIGHT_BORDER + 2 * FRET_ECART, H - TOP_BORDER - 1, 1, ILI9341_T4_COLOR_BLACK);
-    drawLine(RIGHT_BORDER + 3 * FRET_ECART, BOTTOM_BORDER, RIGHT_BORDER + 3 * FRET_ECART, H - TOP_BORDER - 1, 1, ILI9341_T4_COLOR_BLACK);
+    drawLine(LEFT_BORDER + FRET_ECART, BOTTOM_BORDER, LEFT_BORDER + FRET_ECART, H - TOP_BORDER - 1, 1, ILI9341_T4_COLOR_BLACK);
+    drawLine(LEFT_BORDER + 2 * FRET_ECART, BOTTOM_BORDER, LEFT_BORDER + 2 * FRET_ECART, H - TOP_BORDER - 1, 1, ILI9341_T4_COLOR_BLACK);
+    drawLine(LEFT_BORDER + 3 * FRET_ECART, BOTTOM_BORDER, LEFT_BORDER + 3 * FRET_ECART, H - TOP_BORDER - 1, 1, ILI9341_T4_COLOR_BLACK);
 }
 
 void getNotePosition(int corde, int fret, int &x, int &y) {
@@ -227,11 +227,14 @@ void getNotePosition(int corde, int fret, int &x, int &y) {
   }
 }
 
-void writeText(int x, int y, const char* text, uint16_t color, int fontSize) {
+void writeText(int x, int y, const char* text, uint16_t color, int fontSize, bool centered) {
     
-    //tft.overlayText(fb, text, 0, 0, 10, 65535U, 0.3f, 31U, false);  
-    tft.overlayText(fb, "Game of life demo", 2, 0, 14, ILI9341_T4_COLOR_WHITE, 1.0f, ILI9341_T4_COLOR_RED, 0.3f, 1); // draw text    
-
+    if (centered) {
+        tft.printTextCentered(fb, text, x, y, fontSize, color); // draw centered text
+    }
+    else{
+        tft.printText(fb, text, x, y, fontSize, color); // draw text with specific color
+    }    
 }
 
 void updateDisplay() {

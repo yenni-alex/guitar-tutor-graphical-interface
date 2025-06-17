@@ -2,6 +2,7 @@
 #define UI_H
 
 #include "DisplayManager.h"
+#include "globals.h"
 
 // Max widgets par screen
 #define MAX_WIDGETS 10

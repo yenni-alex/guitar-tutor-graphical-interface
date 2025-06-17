@@ -6,6 +6,7 @@
 #include "xml.h"
 #include "Icons.h"
 #include "UI.h"
+#include "globals.h"
 #include <TeensyThreads.h>
 
 LedController ledController;
@@ -36,7 +37,11 @@ void UpdateDisplayThread() {
     //updateUI();
     // Gestion tactile ici
     checkTouch();
-    updateDisplay();
+    if(screenHasChanged) {
+      screenHasChanged = false;
+      updateDisplay();
+    }
+    //updateDisplay();
     // FIN TEST UI
     threads.delay(20);
   }

@@ -34,7 +34,7 @@ void drawNote(int corde, int fret, bool fill, uint16_t color);
 void drawTabulation();
 void getNotePosition(int corde, int fret, int &x, int &y);
 void updateDisplay();
-void writeText(int x, int y, const char* text, uint16_t color, int fontSize);
+void writeText(int x, int y, const char* text, uint16_t color, int fontSize, bool centered = false);
 uint16_t RGB24_to_RGB565(uint32_t color);
     
 

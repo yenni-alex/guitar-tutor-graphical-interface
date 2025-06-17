@@ -60,7 +60,7 @@ void setupMenuScreen() {
         onResumePressed,
         [](){
             drawRectangle(BUTTON_X, BUTTON_START_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_BLUE);
-            writeText(BUTTON_X + 10, BUTTON_START_Y + 15, "Resume", 65535U, 10);
+            writeText(BUTTON_X + (BUTTON_WIDTH / 2), BUTTON_START_Y + (BUTTON_HEIGHT / 2) + 14, "Resume", 65535U, 14, true);
             Serial.println("Resume button drawn and written.");
         }
     };
@@ -71,6 +71,8 @@ void setupMenuScreen() {
         onLoadPressed,
         [](){
             drawRectangle(BUTTON_X, BUTTON_START_Y + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_YELLOW);
+            writeText(BUTTON_X + (BUTTON_WIDTH / 2), BUTTON_START_Y + (1.5*BUTTON_HEIGHT) + BUTTON_SPACING + 14, "Load", 65535U, 14, true);
+
         }
     };
     addWidget(loadButton);
@@ -80,6 +82,7 @@ void setupMenuScreen() {
         onOptionsPressed,
         [](){
             drawRectangle(BUTTON_X, BUTTON_START_Y + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_RED);
+            writeText(BUTTON_X + (BUTTON_WIDTH / 2), BUTTON_START_Y + (2.5*BUTTON_HEIGHT) + (2*BUTTON_SPACING) + 14, "Options", 65535U, 14, true);
         }
     };
     addWidget(optionsButton);
@@ -87,6 +90,7 @@ void setupMenuScreen() {
 void setupResumeScreen() {
     clearWidgets();
     clearDisplay(ILI9341_T4_COLOR_BLUE);
+    drawTabulation();
     addBackButton();
 }
 void setupLoadScreen() {
@@ -139,6 +143,7 @@ void setScreen(Screen* screen) {
     // clearWidgets(); // POSE PRBLM
     currentScreen = screen;
     if (currentScreen) currentScreen->draw();
+    screenHasChanged = true; // Indique que l'écran a été modifié
 }
 
 void updateUI() {

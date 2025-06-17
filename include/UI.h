@@ -3,6 +3,7 @@
 
 #include "DisplayManager.h"
 #include "globals.h"
+#include "xml.h"
 
 // Max widgets par screen
 #define MAX_WIDGETS 10

@@ -101,7 +101,8 @@
 			"latch": "cpp",
 			"scoped_allocator": "cpp",
 			"shared_mutex": "cpp",
-			"syncstream": "cpp"
+			"syncstream": "cpp",
+			"xlocale": "cpp"
 		},
 		"stm32-for-vscode.openOCDPath": false,
 		"stm32-for-vscode.makePath": false,

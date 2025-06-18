@@ -59,8 +59,11 @@ void onRestartPressed() { Serial.println("ON RESTART PRESSED"); } //TODO
 void onLoadXmlPressed() { 
     Serial.println("ON LOAD XML PRESSED"); 
     Serial.println(selectedFileIndex);
-    //loadSongFromXML(fileList[selectedFileIndex]); // Charge le fichier XML sélectionné          TODO je crois que ca fou la merde a continuer
-                       
+    loadSongFromXML(fileList[selectedFileIndex]); // Charge le fichier XML sélectionné          TODO je crois que ca fou la merde a continuer
+    Serial.println("Song loaded from XML.");
+    setScreen(&resumeScreen); // Retour à l'écran de reprise après chargement       
+    //screenHasChanged = true; // Indique que l'écran a changé
+    Serial.println("Screen has changed after loading XML.");
 } 
 
 

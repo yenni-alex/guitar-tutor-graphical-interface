@@ -29,9 +29,17 @@ void loadSongFromXML(const char* filename) {
     currentSong.chordCount = 0;
     Chord* chord = nullptr;
     char line[128];
-    while (file.available()) {
-        file.readBytesUntil('\n', line, sizeof(line) - 1);
-        line[sizeof(line) - 1] = 0;
+    bool songEnd = false;
+    while (true) {
+        int len = file.readBytesUntil('\n', line, sizeof(line) - 1);
+        line[len] = '\0';
+        Serial.print("Ligne lue : ");
+        Serial.println(line);
+        if (strstr(line, "</song>")) {
+            Serial.println("Fin de la lecture du fichier XML");
+            songEnd = true;
+            break;
+        }
         // Début d'un accord
         if (strstr(line, "<chord")) {
             Serial.println("lecture d'un accord");
@@ -61,6 +69,11 @@ void loadSongFromXML(const char* filename) {
             parseColor(colorHex, color);
             chord->notes[chord->noteCount++] = Note(freq, threshold, color, led, corde, caseFret);
         }
+        if (len == 0 && file.available() == 0) break; // Sécurité si </song> absent
+    }
+    // Si la boucle s'est arrêtée sans voir </song>, on traite la dernière ligne lue
+    if (!songEnd && strlen(line) > 0 && strstr(line, "</song>")) {
+        Serial.println("Fin de la lecture du fichier XML (fin sans retour ligne)");
     }
     Serial.print("Nombre d'accords lus : ");
     Serial.println(currentSong.chordCount);

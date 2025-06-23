@@ -11,10 +11,6 @@
 
 LedController ledController;
 
-uint32_t CRGBtoUint32(const CRGB & color) {
-    return ((uint32_t)color.r << 16) | ((uint32_t)color.g << 8) | ((uint32_t)color.b);
-}
-
 
 
 void UpdateDisplayThread() {
@@ -35,6 +31,7 @@ void UpdateDisplayThread() {
     
     // TEST UI
     //updateUI();
+    
     // Gestion tactile ici
     checkTouch();
     if(screenHasChanged) {

@@ -15,8 +15,6 @@
 extern char fileList[MAX_FILES][MAX_FILENAME_LENGTH];
 extern int fileCount;
 
-void parseColor(int colorInt, CRGB& color);
-//void loadSongFromXML(const char* filename);
 void loadSongFromCSV(const char* filename);
 void readFileList();
 

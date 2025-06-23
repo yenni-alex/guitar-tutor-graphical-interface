@@ -43,19 +43,7 @@ void mapTouchToScreen(int raw_x, int raw_y, int &screen_x, int &screen_y) {
     screen_y = constrain(screen_y, 0, H - 1);
 }
 
-uint16_t RGB24_to_RGB565(uint32_t color24) {
-    uint8_t r = (color24 >> 16) & 0xFF;
-    uint8_t g = (color24 >> 8) & 0xFF;
-    uint8_t b = color24 & 0xFF;
 
-    uint16_t r5 = (r * 31 + 15) / 255;
-    uint16_t g6 = (g * 63 + 31) / 255;
-    uint16_t b5 = (b * 31 + 15) / 255;
-
-    uint16_t color565 = (r5 << 11) | (g6 << 5) | b5;
-
-    return color565;  // PAS DE SWAP !!!
-}
 
 void initDisplay() {
     //tft.output(&Serial);                // output debug infos to serial port.  

@@ -9,12 +9,14 @@
 #include <algorithm>  // pour std::sort
 #include <Audio.h>
 #include <FastLED.h>
+#include "globals.h"
 
 class Note {
 public:
     float freq;         // Fréquence de la note
     float threshold;    // Seuil de détection pour cette note
-    //CRGB color;
+    CRGB ledColor;
+    uint16_t displayColor; // Couleur de la note pour l'affichage (en RGB565)
     int colorInt;      // Couleur de la note (en entier RGB)
     int led;            // Numéro de la LED
     int corde;          // Numéro de la corde
@@ -22,7 +24,10 @@ public:
     //Note(float f = 0, float t = 0, CRGB c = 0, int l = -1, int co = -1, int ca = -1)
     //    : freq(f), threshold(t), color(c), led(l), corde(co), caseFret(ca) {}
     Note(float f = 0, float t = 0, int c = 0, int l = -1, int co = -1, int ca = -1)
-        : freq(f), threshold(t), colorInt(c), led(l), corde(co), caseFret(ca) {}
+        : freq(f), threshold(t), colorInt(c), led(l), corde(co), caseFret(ca) {
+            ledColor = parseColorLed(colorInt); // Convertit l'entier en CRGB
+            displayColor = parseColorDisplay(colorInt); // Convertit l'entier RGB
+        }
     
     // Opérateur d'assignation explicite
 

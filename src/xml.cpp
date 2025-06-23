@@ -1,42 +1,5 @@
 #include "xml.h"
 
-//void parseColor(const char* hex, CRGB& color) {
-//    unsigned long val = strtoul(hex, nullptr, 16);
-//    color.r = (val >> 16) & 0xFF;
-//    color.g = (val >> 8) & 0xFF;
-//    color.b = val & 0xFF;
-//}
-void parseColor(int colorInt, CRGB& color) {
-    // Si c'est un code hexadécimal (commence par un chiffre ou A-F)
-    switch (colorInt) 
-    {
-    case 0:
-        color.r = 0; color.g = 0; color.b = 0; // Noir
-        break;
-    case 1:
-        color.r = 255; color.g = 0; color.b = 0; // Rouge
-        break;
-    case 2:
-        color.r = 0; color.g = 255; color.b = 0; // Vert
-        break;
-    case 3:
-        color.r = 0; color.g = 0; color.b = 255; // Bleu
-        break;
-    case 4:
-        color.r = 255; color.g = 255; color.b = 0; // Jaune
-        break; 
-    case 5:
-        color.r = 255; color.g = 0; color.b = 255; // Magenta
-        break;
-    case 6:
-        color.r = 0; color.g = 255; color.b = 255; // Cyan
-        break;
-    
-    default:
-        break;
-    }
-}
-
 void loadSongFromCSV(const char* filename) {
     File file = SD.open(filename);
     if (!file) {
@@ -44,7 +7,7 @@ void loadSongFromCSV(const char* filename) {
         return;
     }
     Serial.println("Fichier CSV ouvert avec succès");
-
+    file.setTimeout(1000); // Timeout de 1 seconde pour éviter les blocages
     char line[128];
     char* token;
     int chordIndex = -1;
@@ -55,10 +18,14 @@ void loadSongFromCSV(const char* filename) {
         Serial.println("on lit une ligne...");
         file.readBytesUntil('\n', line, sizeof(line) - 1);
         line[sizeof(line) - 1] = 0;
+        Serial.print("line :");
+        Serial.println(line);
 
         token = strtok(line, ",");
+        Serial.print("token :");
+        Serial.println(token);
         if (!token) continue;
-
+        
         if (strcmp(token, "SONG") == 0) {
             Serial.println("on lit une chanson...");
             token = strtok(nullptr, ",");
@@ -97,24 +64,36 @@ void loadSongFromCSV(const char* filename) {
             int corde = atoi(strtok(nullptr, ","));
             int caseFret = atoi(strtok(nullptr, ","));
 
-            CRGB color;
-            parseColor(colorInt, color);
+            //CRGB color;
+            //parseColor(colorInt, color);
 
-            chord.notes[chord.noteCount++] = Note(freq, threshold, color, led, corde, caseFret);
+            chord.notes[chord.noteCount++] = Note(freq, threshold, colorInt, led, corde, caseFret);
+        }
+        else if (strcmp(token, "END") == 0) {
+            Serial.println("Fin de la chanson");
+            break;
         }
         else {
             Serial.print("Ligne ignorée : ");
             Serial.println(line);
+            Serial.print("Token : ");
+            Serial.println(token);
+            Serial.println(strcmp(token, "SONG"));
+            Serial.println(strcmp(token, "CHORD"));
+            Serial.println(strcmp(token, "NOTE"));
         }
     }
     Serial.println("Lecture du fichier CSV terminée");
     file.close();
+    songLoaded = true;
 
     Serial.print("Chanson chargée : ");
     Serial.println(currentSong.name);
     Serial.print("Nombre d'accords : ");
     Serial.println(currentSong.chordCount);
 }
+
+
 /*
 static bool extractAttr(const char* line, const char* key, char* out, size_t outlen) {
     const char* p = strstr(line, key);

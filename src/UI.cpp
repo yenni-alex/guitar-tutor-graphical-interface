@@ -30,6 +30,16 @@ void drawMenuScreen() {
     setupMenuScreen(); // Setup les boutons du menu
     //drawWidgets();
 }
+
+void updateResumeScreen() {
+    if (currentPlayingChordIndex < currentSong.chordCount) {
+        Chord& chord = currentSong.chords[currentPlayingChordIndex];
+        for (uint8_t i = 0; i < chord.noteCount; ++i) {
+            drawNote(chord.notes[i].corde, chord.notes[i].caseFret, true, chord.notes[i].displayColor);
+        }
+
+    }
+}
 // Fonctions de gestion des touches pour chaque SCREEN
 void handleTouchResumeScreen(int x, int y) {
     handleTouchWidgets(x, y);
@@ -50,14 +60,10 @@ int selectedFileIndex = -1; // -1 = rien sélectionné
 void onResumePressed() {
     setScreen(&resumeScreen); 
     Serial.println("onResumePressed called");
-    printFreeMemory(); // Affiche la mémoire libre pour le débogage
 }
 void onLoadPressed()    {
     Serial.println("onLoadPressed called");
-    printFreeMemory(); // Affiche la mémoire libre pour le débogage
     setScreen(&loadScreen);
-    Serial.println("setScreen(&loadScreen) called");
-    printFreeMemory(); // Affiche la mémoire libre pour le débogage 
 }
 void onOptionsPressed() { setScreen(&optionsScreen); }
 void onBackToMenu() { setScreen(&menuScreen); }
@@ -68,16 +74,9 @@ void onStopPressed() { Serial.println("ON STOP PRESSED"); } //TODO
 void onRestartPressed() { Serial.println("ON RESTART PRESSED"); } //TODO
 void onLoadXmlPressed() { 
     Serial.println("onLoadXmlPressed called"); 
-    printFreeMemory(); // Affiche la mémoire libre pour le débogage
-    //Serial.println(selectedFileIndex);
-    //loadSongFromXML(fileList[selectedFileIndex]); // Charge le fichier XML sélectionné          TODO je crois que ca fou la merde a continuer
     loadSongFromCSV(fileList[selectedFileIndex]); // Charge le fichier CSV sélectionné
     Serial.println("Song loaded from XML.");
-    printFreeMemory(); // Affiche la mémoire libre après chargement
     setScreen(&resumeScreen); // Retour à l'écran de reprise après chargement       
-    //screenHasChanged = true; // Indique que l'écran a changé
-    Serial.println("Screen has changed after loading XML.");
-    printFreeMemory(); // Affiche la mémoire libre après le changement d'écran
 } 
 
 

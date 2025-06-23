@@ -31,15 +31,6 @@ void drawMenuScreen() {
     //drawWidgets();
 }
 
-void updateResumeScreen() {
-    if (currentPlayingChordIndex < currentSong.chordCount) {
-        Chord& chord = currentSong.chords[currentPlayingChordIndex];
-        for (uint8_t i = 0; i < chord.noteCount; ++i) {
-            drawNote(chord.notes[i].corde, chord.notes[i].caseFret, true, chord.notes[i].displayColor);
-        }
-
-    }
-}
 // Fonctions de gestion des touches pour chaque SCREEN
 void handleTouchResumeScreen(int x, int y) {
     handleTouchWidgets(x, y);
@@ -74,9 +65,50 @@ void onStopPressed() { Serial.println("ON STOP PRESSED"); } //TODO
 void onRestartPressed() { Serial.println("ON RESTART PRESSED"); } //TODO
 void onLoadXmlPressed() { 
     Serial.println("onLoadXmlPressed called"); 
-    loadSongFromCSV(fileList[selectedFileIndex]); // Charge le fichier CSV sélectionné
+    
+    if(loadSongFromJson(fileList[selectedFileIndex])) {
+        Serial.print("Loaded song from file: ");
+        Serial.println(fileList[selectedFileIndex]);
+        songLoaded = true; // Indique que la chanson a été chargée
+        Serial.println(currentSong.name);
+        Serial.println(currentSong.bpm);
+        Serial.println(currentSong.chordCount);
+
+        for(int i = 0; i < currentSong.chordCount; ++i) {
+            Serial.print("Chord ");
+            Serial.print(i);
+            Serial.print(": Time = ");
+            Serial.print(currentSong.chords[i].time);
+            Serial.print(", Height = ");
+            Serial.print(currentSong.chords[i].heightOfHand);
+            Serial.print(", Notes = ");
+            Serial.println(currentSong.chords[i].noteCount);
+            for(int j = 0; j < currentSong.chords[i].noteCount; ++j) {
+                Serial.print("  Note ");
+                Serial.print(j);
+                Serial.print(": Freq = ");
+                Serial.print(currentSong.chords[i].notes[j].freq);
+                Serial.print(", Threshold = ");
+                Serial.print(currentSong.chords[i].notes[j].threshold);
+                Serial.print(", Color = ");
+                Serial.println(currentSong.chords[i].notes[j].colorInt);
+                Serial.print(", Led = ");
+                Serial.print(currentSong.chords[i].notes[j].led);
+                Serial.print(", Corde = ");
+                Serial.print(currentSong.chords[i].notes[j].corde);
+                Serial.print(", Case = ");
+                Serial.println(currentSong.chords[i].notes[j].caseFret);
+            }
+        }
+    } else {
+        Serial.println("Failed to load song from XML.");
+        return;
+    }
+
+
     Serial.println("Song loaded from XML.");
-    setScreen(&resumeScreen); // Retour à l'écran de reprise après chargement       
+    setScreen(&resumeScreen); // Retour à l'écran de reprise après chargement   
+    Serial.print("Screen has changed: ");    
 } 
 
 
@@ -351,5 +383,9 @@ void checkTouch() {
         int screenX, screenY;
         mapTouchToScreen(p.x, p.y, screenX, screenY);
         handleTouchUI(screenX, screenY);
+        Serial.print("Touch at: ");
+        Serial.print(screenX);
+        Serial.print(", ");
+        Serial.println(screenY);
     }
 }

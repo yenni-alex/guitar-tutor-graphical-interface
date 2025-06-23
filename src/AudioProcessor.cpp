@@ -18,7 +18,7 @@ int sample_index = 0;
 bool ready_for_fft = false;
 
 DMAMEM Song currentSong;
-volatile int currentPlayingChordIndex = 0;
+
 const int totalChords = Song::MAX_CHORDS;
 
 void initAudio() {

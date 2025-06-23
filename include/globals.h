@@ -6,6 +6,8 @@
 #include <ILI9341_t4.h>
 extern bool screenHasChanged;
 extern bool songLoaded;
+extern volatile int currentPlayingChordIndex;
+extern volatile int oldChordIndex;
 
 extern "C" char* sbrk(int incr);
 void printFreeMemory();

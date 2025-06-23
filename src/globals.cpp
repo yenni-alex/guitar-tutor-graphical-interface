@@ -2,6 +2,8 @@
 
 bool screenHasChanged = false;
 bool songLoaded = false;
+volatile int currentPlayingChordIndex = 0;
+volatile int oldChordIndex = -1;
 
 extern "C" char* sbrk(int incr);
 void printFreeMemory() {

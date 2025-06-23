@@ -186,6 +186,17 @@ void drawNote(int corde, int fret, bool fill, uint16_t color) {
     }
 
     drawCircle(x, y, 10,color, fill, 1);
+    // update region for the note
+    int startX = x - 10;
+    int endX = x + 10;
+    int startY = y - 10;
+    int endY = y + 10;
+    if (startX < 0) startX = 0;
+    if (endX >= W) endX = W - 1;
+    if (startY < 0) startY = 0;
+    if (endY >= H) endY = H - 1;
+    
+
 }
 
 void drawTabulation() {

@@ -1,297 +1,159 @@
 #include "xml.h"
 
-void loadSongFromCSV(const char* filename) {
+bool loadSongFromJson(const char* filename) {
     File file = SD.open(filename);
     if (!file) {
-        Serial.println("Erreur ouverture fichier CSV");
-        return;
+        Serial.println("Erreur : fichier introuvable");
+        return false;
     }
-    Serial.println("Fichier CSV ouvert avec succès");
-    file.setTimeout(1000); // Timeout de 1 seconde pour éviter les blocages
-    char line[128];
-    char* token;
-    int chordIndex = -1;
 
-    currentSong.chordCount = 0;
-    Serial.println("on va rentrer dans le while...");
-    while (file.available()) {
-        Serial.println("on lit une ligne...");
-        file.readBytesUntil('\n', line, sizeof(line) - 1);
-        line[sizeof(line) - 1] = 0;
-        Serial.print("line :");
-        Serial.println(line);
+    StaticJsonDocument<8192> doc; // 8 Ko → adapte si plus petit fichier
 
-        token = strtok(line, ",");
-        Serial.print("token :");
-        Serial.println(token);
-        if (!token) continue;
-        
-        if (strcmp(token, "SONG") == 0) {
-            Serial.println("on lit une chanson...");
-            token = strtok(nullptr, ",");
-            strncpy(currentSong.name, token, sizeof(currentSong.name) - 1);
-            currentSong.name[sizeof(currentSong.name) - 1] = 0;
-
-            token = strtok(nullptr, ",");
-            currentSong.bpm = atoi(token);
-
-            token = strtok(nullptr, ",");
-            currentSong.numChords = atoi(token);
-        }
-
-        else if (strcmp(token, "CHORD") == 0 && currentSong.chordCount < Song::MAX_CHORDS) {
-            Serial.println("on lit un accord...");
-            chordIndex = currentSong.chordCount++;
-            Chord& chord = currentSong.chords[chordIndex];
-
-            token = strtok(nullptr, ",");
-            chord.time = atoi(token);
-            token = strtok(nullptr, ",");
-            chord.heightOfHand = atoi(token);
-            token = strtok(nullptr, ",");
-            chord.noteCount = 0; // notes seront ajoutées ensuite
-        }
-
-        else if (strcmp(token, "NOTE") == 0 && chordIndex >= 0) {
-            Serial.println("on lit une note...");
-            Chord& chord = currentSong.chords[chordIndex];
-            if (chord.noteCount >= Chord::MAX_NOTES) continue;
-
-            float freq = atof(strtok(nullptr, ","));
-            float threshold = atof(strtok(nullptr, ","));
-            int colorInt = atoi(strtok(nullptr, ","));
-            int led = atoi(strtok(nullptr, ","));
-            int corde = atoi(strtok(nullptr, ","));
-            int caseFret = atoi(strtok(nullptr, ","));
-
-            //CRGB color;
-            //parseColor(colorInt, color);
-
-            chord.notes[chord.noteCount++] = Note(freq, threshold, colorInt, led, corde, caseFret);
-        }
-        else if (strcmp(token, "END") == 0) {
-            Serial.println("Fin de la chanson");
-            break;
-        }
-        else {
-            Serial.print("Ligne ignorée : ");
-            Serial.println(line);
-            Serial.print("Token : ");
-            Serial.println(token);
-            Serial.println(strcmp(token, "SONG"));
-            Serial.println(strcmp(token, "CHORD"));
-            Serial.println(strcmp(token, "NOTE"));
-        }
-    }
-    Serial.println("Lecture du fichier CSV terminée");
+    DeserializationError error = deserializeJson(doc, file);
     file.close();
-    songLoaded = true;
+    if (error) {
+        Serial.print("Erreur JSON: ");
+        Serial.println(error.c_str());
+        return false;
+    }
 
-    Serial.print("Chanson chargée : ");
-    Serial.println(currentSong.name);
-    Serial.print("Nombre d'accords : ");
-    Serial.println(currentSong.chordCount);
-}
+    // Nom de la chanson
+    const char* songName = doc["name"] | "Unnamed";
+    strncpy(currentSong.name, songName, sizeof(currentSong.name) - 1);
+    currentSong.name[sizeof(currentSong.name) - 1] = '\0';
 
+    // BPM
+    currentSong.bpm = doc["bpm"] | 120;
 
-/*
-static bool extractAttr(const char* line, const char* key, char* out, size_t outlen) {
-    const char* p = strstr(line, key);
-    if (!p) return false;
-    p += strlen(key);
-    while (*p == ' ' || *p == '=') ++p;
-    if (*p == '"') ++p;
-    size_t i = 0;
-    while (*p && *p != '"' && i < outlen-1) out[i++] = *p++;
-    out[i] = 0;
-    return i > 0;
-}
-    */
-   /*
-static bool extractAttr(const char* line, const char* key, char* out, size_t outlen) {
-    const char* p = strstr(line, key);
-    if (!p) return false;
-    p += strlen(key);
-    while (*p == ' ' || *p == '=') ++p;
-    if (*p == '"') ++p;
+    // Chargement des accords
+    JsonArray chordArray = doc["chords"];
+    currentSong.chordCount = 0;
+
+    for (JsonObject c : chordArray) {
+        if (currentSong.chordCount >= Song::MAX_CHORDS) break;
+
+        Chord& chord = currentSong.chords[currentSong.chordCount++];
+        chord.time = c["time"] | 0;
+        chord.heightOfHand = c["height"] | 0;
+
+        JsonArray noteArray = c["notes"];
+        chord.noteCount = 0;
+        for (JsonObject n : noteArray) {
+            if (chord.noteCount >= Chord::MAX_NOTES) break;
     
-    size_t i = 0;
-    while (*p && *p != '"' && *p != ' ' && *p != '>' && i < outlen-1) {
-        out[i++] = *p++;
+            //float freq = n["freq"] | 0;
+            float freq = n["freq"] | 0.0f; // Utilise 0.0f pour les fréquences
+            float threshold = n["threshold"] | 0.05;
+            int color = n["color"] | 0;
+            int led = n["led"] | -1;
+            int corde = n["corde"] | -1;
+            int caseFret = n["case"] | -1;
+
+            chord.notes[chord.noteCount++] = Note(freq, threshold, color, led, corde, caseFret);
+        }
     }
-    out[i] = 0;
-    return i > 0;
+
+    currentSong.numChords = currentSong.chordCount;
+
+    Serial.print("Chargé : ");
+    Serial.print(currentSong.chordCount);
+    Serial.println(" accords");
+
+    return true;
 }
-    */
 /*
-void loadSongFromXML(const char* filename) {
-    File file = SD.open(filename);
-    if (!file) {
-        Serial.println("Erreur ouverture fichier XML");
-        return;
+Note loadNoteFromCSV(const char* line) {  // ca ca marche
+    // Copie de la ligne pour la modifier avec strtok
+    char buffer[128];
+    strncpy(buffer, line, sizeof(buffer));
+    buffer[sizeof(buffer) - 1] = '\0'; // Sécurité terminaison
+
+    const char* delimiter = ",";
+    char* token = strtok(buffer, delimiter);
+
+    if (token == nullptr || strcmp(token, "NOTE") != 0) {
+        // Ligne invalide
+        return Note();
     }
-    Serial.println("Fichier XML ouvert avec succès");
-    currentSong.chordCount = 0;
-    Chord* chord = nullptr;
-    char line[128];
-    while (file.available()) {
-        file.readBytesUntil('\n', line, sizeof(line) - 1);
-        line[sizeof(line) - 1] = 0;
-        // Début d'un accord
-        if (strstr(line, "<chord")) {
-            Serial.println("lecture d'un accord");
-            if (currentSong.chordCount < Song::MAX_CHORDS) {
-                chord = &currentSong.chords[currentSong.chordCount++];
-                chord->noteCount = 0;
-                char buf[16];
-                chord->time = 0; chord->heightOfHand = 0;
-                if (extractAttr(line, "time", buf, sizeof(buf))) chord->time = atoi(buf);
-                if (extractAttr(line, "heightOfHand", buf, sizeof(buf))) chord->heightOfHand = atoi(buf);
-            }
-        }
-        // Note
-        else if (strstr(line, "<note") && chord && chord->noteCount < Chord::MAX_NOTES) {
-            Serial.println("lecture d'une note");
-            float freq = 0, threshold = 0;
-            int led = -1, corde = -1, caseFret = -1;
-            char colorHex[8] = "000000";
-            char buf[16];
-            if (extractAttr(line, "freq", buf, sizeof(buf))) freq = atof(buf);
-            if (extractAttr(line, "threshold", buf, sizeof(buf))) threshold = atof(buf);
-            if (extractAttr(line, "color", colorHex, sizeof(colorHex))) {}
-            if (extractAttr(line, "led", buf, sizeof(buf))) led = atoi(buf);
-            if (extractAttr(line, "corde", buf, sizeof(buf))) corde = atoi(buf);
-            if (extractAttr(line, "caseFret", buf, sizeof(buf))) caseFret = atoi(buf);
-            CRGB color;
-            parseColor(colorHex, color);
-            chord->notes[chord->noteCount++] = Note(freq, threshold, color, led, corde, caseFret);
-        }
+
+    float freq = 0.0f;
+    float threshold = 0.0f;
+    int colorInt = 0;
+    int led = -1;
+    int corde = -1;
+    int caseFret = -1;
+
+    token = strtok(nullptr, delimiter);
+    if (token) freq = atof(token);
+
+    token = strtok(nullptr, delimiter);
+    if (token) threshold = atof(token);
+
+    token = strtok(nullptr, delimiter);
+    if (token) colorInt = atoi(token);
+
+    token = strtok(nullptr, delimiter);
+    if (token) led = atoi(token);
+
+    token = strtok(nullptr, delimiter);
+    if (token) corde = atoi(token);
+
+    token = strtok(nullptr, delimiter);
+    if (token) caseFret = atoi(token);
+
+    return Note(freq, threshold, colorInt, led, corde, caseFret);
+}
+
+Chord loadChordFromCSVLines(const char* lines[], int lineCount) {
+    Chord chord;
+
+    if (lineCount == 0) return chord;
+
+    // Parse la première ligne (CHORD)
+    char buffer[128];
+    strncpy(buffer, lines[0], sizeof(buffer));
+    buffer[sizeof(buffer) - 1] = '\0';
+
+    const char* delimiter = ",";
+    char* token = strtok(buffer, delimiter);
+
+    if (token == nullptr || strcmp(token, "CHORD") != 0) {
+        // Ligne invalide
+        return chord;
     }
-    Serial.print("Nombre d'accords lus : ");
-    Serial.println(currentSong.chordCount);
-    file.close();
+
+    int time = 0;
+    int height = 0;
+    int numNotes = 0;
+
+    token = strtok(nullptr, delimiter);
+    if (token) time = atoi(token);
+
+    token = strtok(nullptr, delimiter);
+    if (token) height = atoi(token);
+
+    token = strtok(nullptr, delimiter);
+    if (token) numNotes = atoi(token);
+
+    chord.time = time;
+    chord.heightOfHand = height;
+    chord.noteCount = 0;
+
+    // Charger les lignes NOTE suivantes
+    for (int i = 1; i <= numNotes && i < lineCount && chord.noteCount < Chord::MAX_NOTES; ++i) {
+        const char* line = lines[i];
+
+        // Appel à la fonction précédente
+        Note n = loadNoteFromCSV(line);
+        chord.notes[chord.noteCount++] = n;
+    }
+
+    return chord;
 }
 */
 
-/*
-void loadSongFromXML(const char* filename) {
-    File file = SD.open(filename);
-    if (!file) {
-        Serial.println("Erreur ouverture fichier XML");
-        return;
-    }
-    Serial.println("Fichier XML ouvert avec succès");
 
-    currentSong.chordCount = 0;
-    char line[128];
-    char buf[32];
 
-    // Lire la ligne <song ...>
-    file.readBytesUntil('\n', line, sizeof(line) - 1);
-    line[sizeof(line) - 1] = 0;
-
-    // Extraire les attributs de la balise <song>
-    if (extractAttr(line, "name", buf, sizeof(buf))) {
-        strncpy(currentSong.name, buf, sizeof(currentSong.name) - 1);
-        currentSong.name[sizeof(currentSong.name) - 1] = 0;
-    }
-    if (extractAttr(line, "numChords", buf, sizeof(buf))) {
-        currentSong.numChords = atoi(buf);
-    }
-    //return;     // TODO: supprimer cette ligne pour lire les accords              JUSQUE LA CA MARCHE
-    // Boucle for jusqu'à numChords
-    for (int i = 0; i < currentSong.numChords; ++i) {
-        // Lire ligne <chord ...>
-        file.readBytesUntil('\n', line, sizeof(line) - 1);
-        line[sizeof(line) - 1] = 0;
-
-        if (!strstr(line, "<chord")) {
-            Serial.print("Erreur: ligne attendue <chord> manquante à l'index ");
-            Serial.println(i);
-            break;
-        }
-
-        if (currentSong.chordCount < Song::MAX_CHORDS) {
-            Chord* chord = &currentSong.chords[currentSong.chordCount++];
-            chord->noteCount = 0;
-            chord->time = 0;
-            chord->heightOfHand = 0;
-
-            int numNotes = 0;
-
-            if (extractAttr(line, "time", buf, sizeof(buf))) chord->time = atoi(buf);
-            if (extractAttr(line, "heightOfHand", buf, sizeof(buf))) chord->heightOfHand = atoi(buf);
-            if (extractAttr(line, "numNotes", buf, sizeof(buf))) numNotes = atoi(buf);
-            //return;                               //CA MARCHE JUSQUE LA
-            // Lire les lignes <note ... /> jusqu'à </chord>
-            for (int j = 0; j < numNotes; ++j) {
-                //break;  // marche
-                // return // marche pas
-                file.readBytesUntil('\n', line, sizeof(line) - 1);
-                line[sizeof(line) - 1] = 0;
-                //break;  //     MARCHE
-                if (strstr(line, "<note") && chord->noteCount < Chord::MAX_NOTES) {
-                    
-                    float freq = 0, threshold = 0;
-                    int intColor = -1, led = -1, corde = -1, caseFret = -1;
-                    // Initialiser proprement le buffer à chaque itération
-                    //memset(colorHex, 0, sizeof(colorHex));  // Nettoyer le buffer
-                    //strcpy(colorHex, "000000");             // Valeur par défaut
-                    //break;  // marche
-                    if (extractAttr(line, "freq", buf, sizeof(buf))) freq = atof(buf);
-                    //break;  // marche
-                    if (extractAttr(line, "threshold", buf, sizeof(buf))) threshold = atof(buf);
-                    //break;  // marche
-                    if (extractAttr(line, "color", buf, sizeof(buf))) intColor = atoi(buf); // C EST CETTE LIGNE DE MERDE QUI FOU LA MERDE 
-                    //break;  // marche PAS
-                    if (extractAttr(line, "led", buf, sizeof(buf))) led = atoi(buf);
-                    if (extractAttr(line, "corde", buf, sizeof(buf))) corde = atoi(buf);
-                    if (extractAttr(line, "caseFret", buf, sizeof(buf))) caseFret = atoi(buf);
-                    //break;  //          CA MARCHE
-
-                    //CRGB color;
-                    //parseColor(intColor, color);
-                    //break;  //          CA MARCHE
-                    //chord->notes[chord->noteCount++] = Note(freq, threshold, intColor, led, corde, caseFret);
-                    //Note newNote(freq, threshold, intColor, led, corde, caseFret);
-                    //break;
-                    //chord->notes[chord->noteCount++] = newNote;  // Ajouter la note
-
-                    Note& note = chord->notes[chord->noteCount];
-                    // Assignez chaque membre individuellement (adaptez selon votre classe Note)
-                    note.freq = freq;
-                    note.threshold = threshold;
-                    note.colorInt = intColor;  // ou note.colorInt selon votre implémentation
-                    note.led = led;
-                    note.corde = corde;
-                    note.caseFret = caseFret;
-                    chord->noteCount++;
-                    
-                }
-            }
-            //return;  // TODO: supprimer cette ligne pour lire les accords          MARCHE PAS
-            // Lire la ligne de fermeture </chord>
-            file.readBytesUntil('\n', line, sizeof(line) - 1);
-            line[sizeof(line) - 1] = 0;
-            if (!strstr(line, "</chord")) {
-                Serial.println("Erreur : balise </chord> manquante");
-            }
-            //return;  // TODO: supprimer cette ligne pour lire les accords          MARCHE PLUS
-        }
-    }
-    //return;  // TODO: supprimer cette ligne pour lire les accords         LA CA MARCHE PLUS
-    Serial.print("Nom de la chanson : ");
-    Serial.println(currentSong.name);
-    Serial.print("Nombre d'accords annoncés : ");
-    Serial.println(currentSong.numChords);
-    Serial.print("Nombre d'accords réellement lus : ");
-    Serial.println(currentSong.chordCount);
-    
-    file.close();
-}
-    */
-
-// --- TEST Gestion des fichiers XML ---
 
 char fileList[MAX_FILES][MAX_FILENAME_LENGTH];  // définition unique
 int fileCount = 0;
@@ -309,7 +171,7 @@ void readFileList() {
     if (!file.isDirectory()) {
       const char* name = file.name();
       size_t len = strlen(name);
-      if (len < MAX_FILENAME_LENGTH && strstr(name, ".txt")) {
+      if (len < MAX_FILENAME_LENGTH && strstr(name, ".json")) {
         strncpy(fileList[fileCount], name, MAX_FILENAME_LENGTH - 1);
         fileList[fileCount][MAX_FILENAME_LENGTH - 1] = '\0';  // Null-terminate
         fileCount++;

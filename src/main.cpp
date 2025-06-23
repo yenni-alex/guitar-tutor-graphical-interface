@@ -31,7 +31,18 @@ void UpdateDisplayThread() {
     
     // TEST UI
     //updateUI();
-    
+
+    //
+    //if(songLoaded) {
+    //  if (currentPlayingChordIndex < currentSong.chordCount) {
+    //    Chord& chord = currentSong.chords[currentPlayingChordIndex];
+    //    for(uint8_t i = 0; i < chord.noteCount; ++i) {
+    //      drawNote(chord.notes[i].corde, chord.notes[i].caseFret, true, chord.notes[i].displayColor);
+    //      screenHasChanged = true; // Indique que l'écran a changé
+    //    }
+    //  }
+    //}
+      
     // Gestion tactile ici
     checkTouch();
     if(screenHasChanged) {

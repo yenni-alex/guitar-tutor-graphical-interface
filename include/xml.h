@@ -2,6 +2,7 @@
 #define XML_H
 
 #include <SD.h>
+#include <ArduinoJson.h>
 #include "AudioProcessor.h"
 #include "globals.h"
 //#define MAX_FILES 20 // Limite le nombre max de fichiers affichés pour ne pas saturer la RAM
@@ -15,8 +16,10 @@
 extern char fileList[MAX_FILES][MAX_FILENAME_LENGTH];
 extern int fileCount;
 
-void loadSongFromCSV(const char* filename);
 void readFileList();
-
+//Note loadNoteFromCSV(const char* line);
+//Chord loadChordFromCSVLines(const char* lines[], int lineCount);
+bool loadSongFromJson(const char* filename);
+int readLine(File& file, char* buffer, int maxLen);
 
 #endif

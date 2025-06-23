@@ -3,7 +3,7 @@
 
 #include <SD.h>
 #include "AudioProcessor.h"
-
+#include "globals.h"
 //#define MAX_FILES 20 // Limite le nombre max de fichiers affichés pour ne pas saturer la RAM
 //
 //extern String fileList[MAX_FILES];
@@ -15,8 +15,9 @@
 extern char fileList[MAX_FILES][MAX_FILENAME_LENGTH];
 extern int fileCount;
 
-void parseColor(const char* hex, CRGB& color);
-void loadSongFromXML(const char* filename);
+void parseColor(int colorInt, CRGB& color);
+//void loadSongFromXML(const char* filename);
+void loadSongFromCSV(const char* filename);
 void readFileList();
 
 

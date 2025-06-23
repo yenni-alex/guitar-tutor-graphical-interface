@@ -47,8 +47,18 @@ void handleTouchMenuScreen(int x, int y) {
 int selectedFileIndex = -1; // -1 = rien sélectionné
 
 // === Callbacks des boutons ===
-void onResumePressed() { setScreen(&resumeScreen); }
-void onLoadPressed()    { setScreen(&loadScreen); }
+void onResumePressed() {
+    setScreen(&resumeScreen); 
+    Serial.println("onResumePressed called");
+    printFreeMemory(); // Affiche la mémoire libre pour le débogage
+}
+void onLoadPressed()    {
+    Serial.println("onLoadPressed called");
+    printFreeMemory(); // Affiche la mémoire libre pour le débogage
+    setScreen(&loadScreen);
+    Serial.println("setScreen(&loadScreen) called");
+    printFreeMemory(); // Affiche la mémoire libre pour le débogage 
+}
 void onOptionsPressed() { setScreen(&optionsScreen); }
 void onBackToMenu() { setScreen(&menuScreen); }
 void onSettingsPressed() { Serial.println("ON SETTINGS PRESSED");}//TODO
@@ -57,13 +67,17 @@ void onPausePressed() { Serial.println("ON PAUSE PRESSED"); } //TODO
 void onStopPressed() { Serial.println("ON STOP PRESSED"); } //TODO
 void onRestartPressed() { Serial.println("ON RESTART PRESSED"); } //TODO
 void onLoadXmlPressed() { 
-    Serial.println("ON LOAD XML PRESSED"); 
-    Serial.println(selectedFileIndex);
-    loadSongFromXML(fileList[selectedFileIndex]); // Charge le fichier XML sélectionné          TODO je crois que ca fou la merde a continuer
+    Serial.println("onLoadXmlPressed called"); 
+    printFreeMemory(); // Affiche la mémoire libre pour le débogage
+    //Serial.println(selectedFileIndex);
+    //loadSongFromXML(fileList[selectedFileIndex]); // Charge le fichier XML sélectionné          TODO je crois que ca fou la merde a continuer
+    loadSongFromCSV(fileList[selectedFileIndex]); // Charge le fichier CSV sélectionné
     Serial.println("Song loaded from XML.");
+    printFreeMemory(); // Affiche la mémoire libre après chargement
     setScreen(&resumeScreen); // Retour à l'écran de reprise après chargement       
     //screenHasChanged = true; // Indique que l'écran a changé
     Serial.println("Screen has changed after loading XML.");
+    printFreeMemory(); // Affiche la mémoire libre après le changement d'écran
 } 
 
 

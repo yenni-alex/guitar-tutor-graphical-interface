@@ -14,12 +14,18 @@ class Note {
 public:
     float freq;         // Fréquence de la note
     float threshold;    // Seuil de détection pour cette note
-    CRGB color;
-    uint8_t led;            // Numéro de la LED
-    uint8_t corde;          // Numéro de la corde
-    uint8_t caseFret;       // Numéro de la case
-    Note(float f = 0, float t = 0, CRGB c = 0, int l = -1, int co = -1, int ca = -1)
-        : freq(f), threshold(t), color(c), led(l), corde(co), caseFret(ca) {}
+    //CRGB color;
+    int colorInt;      // Couleur de la note (en entier RGB)
+    int led;            // Numéro de la LED
+    int corde;          // Numéro de la corde
+    int caseFret;       // Numéro de la case
+    //Note(float f = 0, float t = 0, CRGB c = 0, int l = -1, int co = -1, int ca = -1)
+    //    : freq(f), threshold(t), color(c), led(l), corde(co), caseFret(ca) {}
+    Note(float f = 0, float t = 0, int c = 0, int l = -1, int co = -1, int ca = -1)
+        : freq(f), threshold(t), colorInt(c), led(l), corde(co), caseFret(ca) {}
+    
+    // Opérateur d'assignation explicite
+
 };
 
 class Chord {
@@ -34,6 +40,9 @@ public:
 
 class Song {
 public:
+    char name[32]; // Nom de la chanson
+    int numChords; // Nombre d'accords dans la chanson
+    int bpm;       // Tempo de la chanson en battements par minute
     static const uint16_t MAX_CHORDS = 64; // Limite mémoire (modifiable)
     Chord chords[MAX_CHORDS];
     uint16_t chordCount; // Nombre d'accords dans la chanson

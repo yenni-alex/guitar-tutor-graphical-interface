@@ -63,24 +63,24 @@ void UpdateAudioThread() {
     }
 }
 
-void updateLedsThread() {
-    int oldChordIndex = -1;
-    while (true) {
-        if (currentPlayingChordIndex != oldChordIndex) {
-            ledController.clear();
-            Chord& chord = currentSong.chords[currentPlayingChordIndex];
-            for (uint8_t i = 0; i < chord.noteCount; ++i) {
-                ledController.setLed(chord.notes[i].led, chord.notes[i].color);
-            }
-            for (uint8_t i = NUM_LEDS - 1; i >= chord.heightOfHand; --i) {
-                ledController.setLed(i, CRGB::Yellow); // ALLUME les LEDs au-dessus de la hauteur de la main
-            }
-            ledController.show();
-            oldChordIndex = currentPlayingChordIndex;
-        }
-        threads.delay(40);
-    }
-}
+//void updateLedsThread() {
+//    int oldChordIndex = -1;
+//    while (true) {
+//        if (currentPlayingChordIndex != oldChordIndex) {
+//            ledController.clear();
+//            Chord& chord = currentSong.chords[currentPlayingChordIndex];
+//            for (uint8_t i = 0; i < chord.noteCount; ++i) {
+//                ledController.setLed(chord.notes[i].led, chord.notes[i].color);
+//            }
+//            for (uint8_t i = NUM_LEDS - 1; i >= chord.heightOfHand; --i) {
+//                ledController.setLed(i, CRGB::Yellow); // ALLUME les LEDs au-dessus de la hauteur de la main
+//            }
+//            ledController.show();
+//            oldChordIndex = currentPlayingChordIndex;
+//        }
+//        threads.delay(40);
+//    }
+//}
 
 void setup() {
   Serial.begin(115200);
@@ -131,9 +131,11 @@ void setup() {
   // FIN TEST UI
 
   threads.addThread(UpdateDisplayThread);
-  threads.addThread(UpdateAudioThread);
-  threads.addThread(updateLedsThread);
+  //threads.addThread(UpdateAudioThread);
+  //threads.addThread(updateLedsThread);
 }
+
+
 
 void loop() {
   delay(1000);

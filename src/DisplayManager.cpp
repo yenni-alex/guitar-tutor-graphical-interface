@@ -174,15 +174,15 @@ void drawCircle(int x, int y, int radius, uint16_t color, bool fill, int thickne
 }
 void drawNote(int corde, int fret, bool fill, uint16_t color) {
     int x, y;
-    y = H - TOP_BORDER - (corde - 1) * CORDS_ECART;
+    y = BOTTOM_BORDER + (corde - 1) * CORDS_ECART;
     if (fret == 0) {
-        x = W - LEFT_BORDER;
+        x = LEFT_BORDER;
     }
     else if (fret == 1) {
-        x = W - LEFT_BORDER - 0.5 * FRET_ECART;
+        x = LEFT_BORDER + 0.5 * FRET_ECART;
     }
     else {
-        x = W - LEFT_BORDER - 0.5 * FRET_ECART - (fret - 1) * FRET_ECART;
+        x = LEFT_BORDER + 0.5 * FRET_ECART + (fret - 1) * FRET_ECART;
     }
 
     drawCircle(x, y, 10,color, fill, 1);

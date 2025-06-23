@@ -32,16 +32,14 @@ void UpdateDisplayThread() {
     // TEST UI
     //updateUI();
 
-    //
-    //if(songLoaded) {
-    //  if (currentPlayingChordIndex < currentSong.chordCount) {
-    //    Chord& chord = currentSong.chords[currentPlayingChordIndex];
-    //    for(uint8_t i = 0; i < chord.noteCount; ++i) {
-    //      drawNote(chord.notes[i].corde, chord.notes[i].caseFret, true, chord.notes[i].displayColor);
-    //      screenHasChanged = true; // Indique que l'écran a changé
-    //    }
-    //  }
-    //}
+    if(songLoaded){
+      drawNote(6, 0, true, ILI9341_T4_COLOR_RED);
+      drawNote(1, 4, true, ILI9341_T4_COLOR_GREEN);
+      //drawNote(currentSong.chords[currentPlayingChordIndex].notes[0].corde, currentSong.chords[currentPlayingChordIndex].notes[0].caseFret, true, currentSong.chords[currentPlayingChordIndex].notes[0].displayColor);
+      Serial.println("Song loaded, drawing note.");
+      screenHasChanged = true; // Indique que l'écran a changé
+    }
+    
       
     // Gestion tactile ici
     checkTouch();

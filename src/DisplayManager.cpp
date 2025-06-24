@@ -10,28 +10,9 @@ DMAMEM ILI9341_T4::DiffBuffStatic<6000> diff2;
 DMAMEM uint16_t internal_fb[H * W]; 
 DMAMEM uint16_t fb[H * W]; 
 
-void onRestart() { // TODO mettre dans UI
-  Serial.println("Restart clicked");
-  currentPlayingChordIndex = 0; // Réinitialiser l'index du chord en cours
-}
-void onSettings() {
-  Serial.println("Settings clicked");
-    // Implémentez la logique pour ouvrir les paramètres
-    
-}
 
-IconButton restart(120, 0, 48, onRestart); // Bouton de redémarrage
-IconButton settings(0, 190, 48, onSettings); // Bouton de paramètres
-
-void drawButtons() {
-    drawIcon(W - 50, 0, play_icon, 48, 48); // play
-    drawIcon(W - 100, 0, pause_icon, 48, 48); // pause
-    drawIcon(W - 150, 0, stop_icon, 48, 48); // stop
-    drawIcon(W - 200, 0, restart_icon, 48, 48); // restart
-    drawIcon(0, H - 50, settings_icon, 48, 48); // settings
-}
 // Fonction de map + inversion des axes
-void mapTouchToScreen(int raw_x, int raw_y, int &screen_x, int &screen_y) {
+void mapTouchToScreen(uint16_t raw_x, uint16_t raw_y, uint16_t &screen_x, uint16_t &screen_y) {
     // Inversion des axes : X tactile -> -Y écran, Y tactile -> X écran (Pour rotation 1)
     //screen_x = map(raw_y, TS_MINY, TS_MAXY, 0, W);
     //screen_y = map(raw_x, TS_MINX, TS_MAXX, H, 0);
@@ -42,8 +23,6 @@ void mapTouchToScreen(int raw_x, int raw_y, int &screen_x, int &screen_y) {
     screen_x = constrain(screen_x, 0, W - 1);
     screen_y = constrain(screen_y, 0, H - 1);
 }
-
-
 
 void initDisplay() {
     //tft.output(&Serial);                // output debug infos to serial port.  
@@ -58,7 +37,7 @@ void clearDisplay(uint16_t color) {
     for (int i = 0; i < H * W; i++) fb[i] = color;
 }
 
-void drawIcon(int x, int y, const uint16_t* icon, int w, int h) {
+void drawIcon(uint16_t x, uint16_t y, const uint16_t* icon, uint16_t w, uint16_t h) {
     for (int j = 0; j < h; j++) {
         for (int i = 0; i < w; i++) {
             int px = x + i;
@@ -70,7 +49,7 @@ void drawIcon(int x, int y, const uint16_t* icon, int w, int h) {
     }
 }
 
-void drawLine(int x0, int y0, int x1, int y1, int thickness, uint16_t color) {
+void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t thickness, uint16_t color) {
     int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
     int dy = abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
     int err = (dx > dy ? dx : -dy) / 2, e2;
@@ -96,7 +75,7 @@ void drawLine(int x0, int y0, int x1, int y1, int thickness, uint16_t color) {
 }
 
 
-void drawRectangle(int x, int y, int width, int height, int thickness, uint16_t color) {
+void drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t thickness, uint16_t color) {
     for (int i = 0; i < thickness; i++) {
         drawLine(x, y + i, x + width - 1, y + i, 1, color);
         drawLine(x, y + height - 1 - i, x + width - 1, y + height - 1 - i, 1, color);
@@ -105,7 +84,7 @@ void drawRectangle(int x, int y, int width, int height, int thickness, uint16_t 
     }
 }
 
-void drawRectangleCentered(int x, int y, int width, int height, int thickness, uint16_t color) {
+void drawRectangleCentered(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t thickness, uint16_t color) {
     
     // Calcul du coin supérieur gauche à partir du centre
     int startX = x - width / 2;
@@ -121,13 +100,13 @@ void drawRectangleCentered(int x, int y, int width, int height, int thickness, u
     }
 }
 
-void drawCircle(int x, int y, int radius, uint16_t color, bool fill, int thickness) {
+void drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color, bool fill, uint16_t thickness) {
     if (fill) {
-        for (int i = -radius; i <= radius; i++) {
-            for (int j = -radius; j <= radius; j++) {
+        for (uint8_t i = -radius; i <= radius; i++) {
+            for (uint8_t j = -radius; j <= radius; j++) {
                 if (i * i + j * j <= radius * radius) {
-                    int px = x + i;
-                    int py = y + j;
+                    uint16_t px = x + i;
+                    uint16_t py = y + j;
                     if (px >= 0 && px < W && py >= 0 && py < H) {
                         fb[py * W + px] = color;
                     }
@@ -136,16 +115,16 @@ void drawCircle(int x, int y, int radius, uint16_t color, bool fill, int thickne
         }
     }
     else {
-        for (int t = 0; t < thickness; t++) {
-            int r = radius - t;
+        for (uint8_t t = 0; t < thickness; t++) {
+            uint16_t r = radius - t;
             if (r < 0) break;
 
-            int dx = r - 1;
-            int dy = 0;
-            int err = 1 - dx;
+            uint16_t dx = r - 1;
+            uint16_t dy = 0;
+            uint16_t err = 1 - dx;
 
             while (dx >= dy) {
-                auto setPixel = [&](int px, int py) {
+                auto setPixel = [&](uint16_t px, uint16_t py) {
                     if (px >= 0 && px < W && py >= 0 && py < H) {
                         fb[py * W + px] = color;
                     }
@@ -172,8 +151,8 @@ void drawCircle(int x, int y, int radius, uint16_t color, bool fill, int thickne
         }
     }
 }
-void drawNote(int corde, int fret, bool fill, uint16_t color) {
-    int x, y;
+void drawNote(uint16_t corde, uint16_t fret, bool fill, uint16_t color) {
+    uint16_t x, y;
     y = BOTTOM_BORDER + (corde - 1) * CORDS_ECART;
     if (fret == 0) {
         x = LEFT_BORDER;
@@ -215,7 +194,7 @@ void drawTabulation() {
     drawLine(LEFT_BORDER + 3 * FRET_ECART, BOTTOM_BORDER, LEFT_BORDER + 3 * FRET_ECART, H - TOP_BORDER - 1, 1, ILI9341_T4_COLOR_BLACK);
 }
 
-void getNotePosition(int corde, int fret, int &x, int &y) {
+void getNotePosition(uint8_t corde, uint8_t fret, uint16_t &x, uint16_t &y) {
   y = W - LEFT_BORDER - (corde - 1) * CORDS_ECART;
   if (fret == 0) {
     x = H - TOP_BORDER;
@@ -226,7 +205,7 @@ void getNotePosition(int corde, int fret, int &x, int &y) {
   }
 }
 
-void writeText(int x, int y, const char* text, uint16_t color, int fontSize, bool centered) {
+void writeText(uint16_t x, uint16_t y, const char* text, uint16_t color, uint8_t fontSize, bool centered) {
     
     if (centered) {
         tft.printTextCentered(fb, text, x, y, fontSize, color); // draw centered text

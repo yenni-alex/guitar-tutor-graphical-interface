@@ -6,36 +6,26 @@
 #include <ILI9341_T4.h>
 #include <TouchScreen.h>
 #include "Config.h"
-#include "AudioProcessor.h"
 #include "Icons.h"
 
 extern TouchScreen ts;
 
-struct IconButton {
-  int x, y;         // position coin haut-gauche
-  int size;         // taille (carré pour simplifier)
-  void (*onClick)(); // fonction appelée quand on clique dessus
-
-  IconButton(int x_, int y_, int size_, void (*onClick_)()) 
-    : x(x_), y(y_), size(size_), onClick(onClick_) {}
-};
-
 void checkTouch();
 void drawButtons();
-void mapTouchToScreen(int raw_x, int raw_y, int &screen_x, int &screen_y);
+void mapTouchToScreen(uint16_t raw_x, uint16_t raw_y, uint16_t &screen_x, uint16_t &screen_y);
 void initDisplay();
 void clearDisplay(uint16_t color = 0);
-void drawIcon(int x, int y, const uint16_t* icon, int w, int h);
-void drawLine(int x0, int y0, int x1, int y1, int thickness, uint16_t color);
-void drawRectangle(int x, int y, int width, int height, int thickness, uint16_t color);
-void drawRectangleCentered(int x, int y, int width, int height, int thickness, uint16_t color);
-void drawCircle(int x, int y, int radius, uint16_t color, bool fill, int thickness);
-void drawNote(int corde, int fret, bool fill, uint16_t color);
+void drawIcon(uint16_t x, uint16_t y, const uint16_t* icon, uint16_t w, uint16_t h);
+void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t thickness, uint16_t color);
+void drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t thickness, uint16_t color);
+void drawRectangleCentered(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t thickness, uint16_t color);
+void drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color, bool fill, uint16_t thickness);
+void drawNote(uint16_t corde, uint16_t fret, bool fill, uint16_t color);
 void drawTabulation();
-void getNotePosition(int corde, int fret, int &x, int &y);
+void getNotePosition(uint8_t corde, uint8_t fret, uint16_t &x, uint16_t &y);
 void updateDisplay();
-void writeText(int x, int y, const char* text, uint16_t color, int fontSize, bool centered = false);
-    
+void writeText(uint16_t x, uint16_t y, const char* text, uint16_t color, uint8_t fontSize, bool centered = false);
+
 
 
 #endif

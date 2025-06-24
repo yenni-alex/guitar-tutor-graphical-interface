@@ -45,7 +45,7 @@ void handleTouchMenuScreen(int x, int y) {
     handleTouchWidgets(x, y);
 }
 
-int selectedFileIndex = -1; // -1 = rien sélectionné
+int8_t selectedFileIndex = -1; // -1 = rien sélectionné
 
 // === Callbacks des boutons ===
 void onResumePressed() {
@@ -54,7 +54,9 @@ void onResumePressed() {
 }
 void onLoadPressed()    {
     Serial.println("onLoadPressed called");
+    printFreeMemory(); // GROSSE PERTE DE MEMOIRE
     setScreen(&loadScreen);
+    printFreeMemory(); // Affiche la mémoire libre après avoir chargé l'écran de chargement
 }
 void onOptionsPressed() { setScreen(&optionsScreen); }
 void onBackToMenu() { setScreen(&menuScreen); }
@@ -65,49 +67,11 @@ void onStopPressed() { Serial.println("ON STOP PRESSED"); } //TODO
 void onRestartPressed() { Serial.println("ON RESTART PRESSED"); } //TODO
 void onLoadXmlPressed() { 
     Serial.println("onLoadXmlPressed called"); 
-    
-    if(loadSongFromJson(fileList[selectedFileIndex])) {
-        Serial.print("Loaded song from file: ");
-        Serial.println(fileList[selectedFileIndex]);
-        songLoaded = true; // Indique que la chanson a été chargée
-        Serial.println(currentSong.name);
-        Serial.println(currentSong.bpm);
-        Serial.println(currentSong.chordCount);
-
-        for(int i = 0; i < currentSong.chordCount; ++i) {
-            Serial.print("Chord ");
-            Serial.print(i);
-            Serial.print(": Time = ");
-            Serial.print(currentSong.chords[i].time);
-            Serial.print(", Height = ");
-            Serial.print(currentSong.chords[i].heightOfHand);
-            Serial.print(", Notes = ");
-            Serial.println(currentSong.chords[i].noteCount);
-            for(int j = 0; j < currentSong.chords[i].noteCount; ++j) {
-                Serial.print("  Note ");
-                Serial.print(j);
-                Serial.print(": Freq = ");
-                Serial.print(currentSong.chords[i].notes[j].freq);
-                Serial.print(", Threshold = ");
-                Serial.print(currentSong.chords[i].notes[j].threshold);
-                Serial.print(", Color = ");
-                Serial.println(currentSong.chords[i].notes[j].colorInt);
-                Serial.print(", Led = ");
-                Serial.print(currentSong.chords[i].notes[j].led);
-                Serial.print(", Corde = ");
-                Serial.print(currentSong.chords[i].notes[j].corde);
-                Serial.print(", Case = ");
-                Serial.println(currentSong.chords[i].notes[j].caseFret);
-            }
-        }
-    } else {
-        Serial.println("Failed to load song from XML.");
-        return;
-    }
-
+    printFreeMemory(); // Affiche la mémoire libre avant de charger une chanson
 
     Serial.println("Song loaded from XML.");
     setScreen(&resumeScreen); // Retour à l'écran de reprise après chargement   
+    printFreeMemory(); // Affiche la mémoire libre après chargement
     Serial.print("Screen has changed: ");    
 } 
 
@@ -151,6 +115,8 @@ void setupMenuScreen() {
     addWidget(optionsButton);
 
     drawWidgets(); // Affiche les boutons du menu
+    Serial.println("Menu screen setup complete.");
+    printFreeMemory(); // Affiche la mémoire libre après le setup du menu
 }
 void setupResumeScreen() {
     clearWidgets();
@@ -206,6 +172,8 @@ void setupResumeScreen() {
     addBackButton();
 
     drawWidgets(); // Affiche les boutons de reprise
+    Serial.println("Resume screen setup complete.");
+    printFreeMemory(); // Affiche la mémoire libre après le setup de l'écran de reprise
 }
 void setupLoadScreen() {
     clearWidgets();
@@ -227,9 +195,9 @@ void setupLoadScreen() {
     
 
     // Affichage des fichiers XML disponibles
-    const int fileButtonHeight = 30;
-    const int startY = 48;
-    const int spacing = 5;
+    const uint8_t fileButtonHeight = 30;
+    const uint8_t startY = 48;
+    const uint8_t spacing = 5;
     if(fileCount == 0) {
         writeText(10, startY, "No files available", ILI9341_T4_COLOR_BLACK, 14, true);
         return;
@@ -313,6 +281,8 @@ void setupLoadScreen() {
         addWidget(fileButton4);
     }
     drawWidgets(); // Affiche les boutons de fichiers
+    Serial.println("Load screen setup complete.");
+    printFreeMemory(); // Affiche la mémoire libre après le setup de l'écran de charg
 }
 void setupOptionsScreen() {
     clearWidgets();
@@ -343,13 +313,13 @@ void clearWidgets() {
 }
 
 void drawWidgets() {
-    for (int i = 0; i < widgetCount; i++) {
+    for (uint8_t i = 0; i < widgetCount; i++) {
         if (widgets[i].draw) widgets[i].draw();
     }
 }
 
 void handleTouchWidgets(int x, int y) {
-    for (int i = 0; i < widgetCount; i++) {
+    for (uint8_t i = 0; i < widgetCount; i++) {
         if (x >= widgets[i].x && x <= widgets[i].x + widgets[i].w &&
             y >= widgets[i].y && y <= widgets[i].y + widgets[i].h) {
             if (widgets[i].onPress) widgets[i].onPress();
@@ -363,12 +333,16 @@ void setScreen(Screen* screen) {
     currentScreen = screen;
     if (currentScreen) currentScreen->draw();
     screenHasChanged = true; // Indique que l'écran a été modifié
+    Serial.print("Screen set");
+    printFreeMemory(); // Affiche la mémoire libre après avoir changé d'écran
 }
 
 void updateUI() {
     if (currentScreen) {
         currentScreen->draw();
     }
+    Serial.println("UI updated.");
+    printFreeMemory(); // Affiche la mémoire libre après la mise à jour de l'
 }
 
 void handleTouchUI(int x, int y) {
@@ -380,7 +354,7 @@ void handleTouchUI(int x, int y) {
 void checkTouch() {
     TSPoint p = ts.getPoint();
     if (p.z > 100) { // Si l'écran est touché
-        int screenX, screenY;
+        uint16_t screenX, screenY;
         mapTouchToScreen(p.x, p.y, screenX, screenY);
         handleTouchUI(screenX, screenY);
         Serial.print("Touch at: ");

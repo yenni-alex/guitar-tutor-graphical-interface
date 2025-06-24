@@ -30,7 +30,7 @@ struct Screen {
 
 // Widget (bouton etc.)
 struct Widget {
-    int x, y, w, h;
+    uint16_t x, y, w, h;
     void (*onPress)();
     void (*draw)();
 };
@@ -49,7 +49,6 @@ void handleTouchMenuScreen(int x, int y);
 void handleTouchResumeScreen(int x, int y);
 void handleTouchLoadScreen(int x, int y);
 void handleTouchOptionsScreen(int x, int y);
-
 
 void setupMenuScreen();
 void setupResumeScreen();

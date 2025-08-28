@@ -6,6 +6,10 @@
 		{
 			"name": "Guitar_hero_V3",
 			"path": "."
+		},
+		{
+			"name": "Guitar_hero_V3_audio",
+			"path": "../Guitar_hero_V3_audio"
 		}
 	],
 	"settings": {

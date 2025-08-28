@@ -80,14 +80,14 @@ void onLoadXmlPressed() {
 // === Setup du MenuScreen ===
 void setupMenuScreen() {
     clearWidgets();
-    clearDisplay(ILI9341_T4_COLOR_PURPLE);
+    clearDisplay(ILI9341_T4_COLOR_WHITE);
 
     Widget resumeButton = {
         BUTTON_X, BUTTON_START_Y, BUTTON_WIDTH, BUTTON_HEIGHT,
         onResumePressed,
         [](){
             drawRectangle(BUTTON_X, BUTTON_START_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_BLUE);
-            writeText(BUTTON_X + (BUTTON_WIDTH / 2), BUTTON_START_Y + (BUTTON_HEIGHT / 2) + 14, "Resume", 65535U, 14, true);
+            writeText(BUTTON_X + (BUTTON_WIDTH / 2), BUTTON_START_Y + (BUTTON_HEIGHT / 2) + 14, "Resume", 0, 14, true); // 65535U
             Serial.println("Resume button drawn and written.");
         }
     };
@@ -97,8 +97,8 @@ void setupMenuScreen() {
         BUTTON_X, BUTTON_START_Y + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT,
         onLoadPressed,
         [](){
-            drawRectangle(BUTTON_X, BUTTON_START_Y + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_YELLOW);
-            writeText(BUTTON_X + (BUTTON_WIDTH / 2), BUTTON_START_Y + (1.5*BUTTON_HEIGHT) + BUTTON_SPACING + 14, "Load", 65535U, 14, true);
+            drawRectangle(BUTTON_X, BUTTON_START_Y + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_BLUE);
+            writeText(BUTTON_X + (BUTTON_WIDTH / 2), BUTTON_START_Y + (1.5*BUTTON_HEIGHT) + BUTTON_SPACING + 14, "Load", 0, 14, true);
 
         }
     };
@@ -108,8 +108,8 @@ void setupMenuScreen() {
         BUTTON_X, BUTTON_START_Y + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT,
         onOptionsPressed,
         [](){
-            drawRectangle(BUTTON_X, BUTTON_START_Y + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_RED);
-            writeText(BUTTON_X + (BUTTON_WIDTH / 2), BUTTON_START_Y + (2.5*BUTTON_HEIGHT) + (2*BUTTON_SPACING) + 14, "Options", 65535U, 14, true);
+            drawRectangle(BUTTON_X, BUTTON_START_Y + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT, 2, ILI9341_T4_COLOR_BLUE);
+            writeText(BUTTON_X + (BUTTON_WIDTH / 2), BUTTON_START_Y + (2.5*BUTTON_HEIGHT) + (2*BUTTON_SPACING) + 14, "Options", 0, 14, true);
         }
     };
     addWidget(optionsButton);
@@ -286,9 +286,28 @@ void setupLoadScreen() {
 }
 void setupOptionsScreen() {
     clearWidgets();
-    clearDisplay(ILI9341_T4_COLOR_RED);
+    clearDisplay(ILI9341_T4_COLOR_WHITE);
     addBackButton();
+    writeText(10, 85, "Mode", ILI9341_T4_COLOR_BLACK, 24, false);
+    Widget modeButton1 = {
+        60, 60, 100, 40,
+        [](){ Serial.println("Mode 1 selected"); }, // Placeholder for actual function
+        [](){
+            drawRectangle(60, 60, 100, 40, 2, ILI9341_T4_COLOR_BLUE);
+            writeText(110, 90, "Blocking", ILI9341_T4_COLOR_BLACK, 14, true);
+        }
+    };
+    addWidget(modeButton1);
 
+    Widget modeButton2 = {
+        180, 60, 100, 40,
+        [](){ Serial.println("Mode 2 selected"); }, // Placeholder for actual function
+        [](){
+            drawRectangle(180, 60, 100, 40, 2, ILI9341_T4_COLOR_BLACK);
+            writeText(230, 90, "Continue", ILI9341_T4_COLOR_BLACK, 14, true);
+        }
+    };
+    addWidget(modeButton2);
     drawWidgets(); // Affiche les boutons d'options
 }
 

@@ -18,7 +18,7 @@ void readFileList() {
     if (!file.isDirectory()) {
       const char* name = file.name();
       size_t len = strlen(name);
-      if (len < MAX_FILENAME_LENGTH && strstr(name, ".json")) {
+      if (len < MAX_FILENAME_LENGTH && strstr(name, ".xml")) {
         strncpy(fileList[fileCount], name, MAX_FILENAME_LENGTH - 1);
         fileList[fileCount][MAX_FILENAME_LENGTH - 1] = '\0';  // Null-terminate
         fileCount++;
